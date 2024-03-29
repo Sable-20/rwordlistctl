@@ -18,7 +18,6 @@ impl std::fmt::Display for Units {
             Units::Kb => write!(f, "KB"),
             Units::Gb => write!(f, "GB"),
             Units::Tb => write!(f, "TB"),
-            _ => Err(std::fmt::Error),
         }
     }
 }

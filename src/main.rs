@@ -3,15 +3,11 @@ use std::{io::Write, path::PathBuf};
 use ansi_term::Color::Red;
 
 use clap::Parser;
-use color_eyre::{
-    eyre::{ensure, eyre}, owo_colors::OwoColorize, Result
-};
+use color_eyre::Result;
 
 use pretty_env_logger::env_logger;
 
-use log::{debug, error, info, trace, warn};
-
-use crate::repo::*;
+use log::{error, info, trace};
 
 mod args;
 mod commands;
@@ -63,7 +59,7 @@ fn main() -> Result<()> {
         }
         _ => pretty_env_logger::formatted_builder()
             .filter_level(log::LevelFilter::Trace)
-            .target(env_logger::Target::Stdout) 
+            .target(env_logger::Target::Stdout)
             .init(),
     }
     color_eyre::install()?;
@@ -84,27 +80,30 @@ fn main() -> Result<()> {
     if cli.command.is_none() {
         error!("No command provided");
         // return Err(eyre!("No command provided"));
-        // std::process::exit(-1); 
+        // std::process::exit(-1);
     }
 
     match &cli.command {
         Some(commands::Command::Fetch(args)) => {
             trace!("Fetch called!");
             info!("{:#?}", args);
-            info!("User agent: {}", Red.bold().italic().paint(args.user_agent.as_ref().unwrap()));
+            info!(
+                "User agent: {}",
+                Red.bold().italic().paint(args.user_agent.as_ref().unwrap())
+            );
             match (args.regex, args.decompress) {
                 (true, true) => {
                     todo!("Decompress and regex");
-                },
+                }
                 (true, false) => {
                     todo!("Regex");
-                },
+                }
                 (false, true) => {
                     todo!("Decompress");
-                },
+                }
                 (false, false) => {
                     todo!("Normal fetch");
-                },
+                }
             }
             // if args.regex {
             //     info!("Using regex");
@@ -119,5 +118,6 @@ fn main() -> Result<()> {
 
     // ensure!(cli.command.is_some(), eyre!("No command provided"));
 
+    #[allow(unreachable_code)]
     Ok(())
 }

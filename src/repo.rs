@@ -1,8 +1,8 @@
 use color_eyre::{
-    eyre::{eyre, ContextCompat, OptionExt, WrapErr, bail},
+    eyre::{eyre, WrapErr},
     Result,
 };
-use log::{debug, warn};
+use log::debug;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -37,14 +37,12 @@ impl Wordlist {
     }
 }
 
-#[allow(dead_code)]
 fn load_repo() -> Result<Repo> {
     let repo = toml::from_str::<Repo>(include_str!("../config/repo.toml"))
         .wrap_err_with(|| eyre!("Failed to read repository from repo.toml"))?;
     Ok(repo)
 }
 
-#[allow(dead_code)]
 pub fn get_wordlist_by_group(group: String) -> Result<Vec<Wordlist>> {
     let repo: Repo = load_repo()?;
     let wordlists = repo
@@ -74,20 +72,26 @@ pub fn get_wordlist_by_name_regex(name: &str) -> Result<Vec<Wordlist>> {
     let repo: Repo = load_repo()?;
 
     let re = regex::Regex::new(name).unwrap();
-    let results = repo.wordlists[0].keys().filter(|key| re.is_match(key)).collect::<Vec<&String>>(); 
+    let results = repo.wordlists[0]
+        .keys()
+        .filter(|key| re.is_match(key))
+        .collect::<Vec<&String>>();
 
-    let ret = results.iter().map(|key| {
-        repo.wordlists[0].get(*key).unwrap().clone()
-    }).collect::<Vec<Wordlist>>();
-    
+    let ret = results
+        .iter()
+        .map(|key| repo.wordlists[0].get(*key).unwrap().clone())
+        .collect::<Vec<Wordlist>>();
+
     Ok(ret)
 }
 
-#[allow(dead_code)]
 pub fn get_wordlist_by_name(name: &str) -> Result<Wordlist> {
     let repo: Repo = load_repo()?;
 
-    debug!("Argument passed in `get_wordlist_by_name`: {}", ansi_term::Color::Red.bold().underline().paint(name));
+    debug!(
+        "Argument passed in `get_wordlist_by_name`: {}",
+        ansi_term::Color::Red.bold().underline().paint(name)
+    );
 
     debug!("{:?}", repo.wordlists[0].get(name));
 
@@ -96,7 +100,7 @@ pub fn get_wordlist_by_name(name: &str) -> Result<Wordlist> {
     // Ok(repo
     //     .wordlists
     //     .into_iter()
-    //     .find(|wordlist| 
+    //     .find(|wordlist|
     //         if let Some(_) = wordlist.get(name) {
     //             true
     //         } else {
@@ -105,7 +109,7 @@ pub fn get_wordlist_by_name(name: &str) -> Result<Wordlist> {
     //     .map(|wordlist| wordlist.values().cloned().next().unwrap())
     //     .ok_or_else(|| eyre!("Wordlist not found"))?)
 
-    // repo.wordlists.iter().find(|wordlist| { 
+    // repo.wordlists.iter().find(|wordlist| {
     //     warn!("{:?}", wordlist.keys().next().unwrap());
     //     wordlist.keys().next().unwrap() == name
     // }).map(|wordlist| {
