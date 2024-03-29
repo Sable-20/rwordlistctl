@@ -46,8 +46,8 @@ impl Data {
 
     pub fn set_human_readable_size(&mut self) {
         self.human_readable_size.store(
-            crate::units::readable_size(self.get_size()).0 as usize, 
-            Ordering::Relaxed
+            crate::units::readable_size(self.get_size()).0 as usize,
+            Ordering::Relaxed,
         );
     }
 

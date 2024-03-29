@@ -12,3 +12,8 @@ Cargo.lock
 
 # MSVC Windows builds of rustc generate these, which store debugging information
 *.pdb
+
+# Uncomment this line when reaching a stable version of project
+# config/test.toml
+
+rwordlistctl.log
