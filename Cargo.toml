@@ -5,7 +5,6 @@ edition = "2021"
 authors = ["Sable-20", "blackarch"]
 description = "Rust rewrite of wordlistctl: Fetch, install and search wordlist archives from websites."
 license = "GPLv3"
-license-file = "LICENSE"
 repository = "https://github.com/Sable-20/rwordlistctl"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

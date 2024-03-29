@@ -33,7 +33,6 @@ pub fn get_unit(unit: &str) -> Units {
     }
 }
 
-#[allow(dead_code)]
 pub fn readable_size(size: usize) -> (f64, Units) {
     let mut counter: u8 = 0;
     let mut size: f64 = size as f64;

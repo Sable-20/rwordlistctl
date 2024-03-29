@@ -59,8 +59,7 @@ pub fn get_wordlist_by_group(group: String) -> Result<Vec<Wordlist>> {
         .map(|wordlist| {
             wordlist
                 .values()
-                .cloned()
-                .next()
+                .next().cloned()
                 .expect("Map of groups failed")
         })
         .collect::<Vec<Wordlist>>(); // Collect the wordlists into a vector
