@@ -1,5 +1,7 @@
 use clap::{value_parser, ArgAction, Args, ValueEnum};
 
+use crate::config;
+
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug, ValueEnum)]
 pub enum Groups {
     Usernames,
@@ -16,8 +18,7 @@ pub struct FetchArgs {
         long = "decompress",
         help = "Decompress and remove the archive file", 
         action = ArgAction::SetTrue,
-        default_value_t = true,
-        num_args = 0,
+        default_value_t = false,
     )]
     pub decompress: bool,
 
@@ -30,7 +31,7 @@ pub struct FetchArgs {
         require_equals = true,
         allow_negative_numbers = false,
         value_parser = value_parser!(u8).range(1..=100),
-        default_value_t = 5,
+        default_value_t = config::get_worker_count(),
     )]
     pub workers: u8,
 
@@ -52,7 +53,7 @@ pub struct FetchArgs {
         help = "Base directory to store wordlists",
         num_args = 1,
         require_equals = true,
-        default_value = "/usr/share/wordlists"
+        default_value = "/usr/share/wordlists",
     )]
     pub base_dir: Option<String>,
 
@@ -85,7 +86,7 @@ pub struct FetchArgs {
         long = "regex",
         help = "Use regex to find wordlists with your search term contained within the name",
         action = ArgAction::SetTrue,
-        default_value_t = true,
+        default_value_t = false,
     )]
     pub regex: bool,
 }

@@ -4,6 +4,7 @@ use std::sync::{
 };
 
 use crate::units::Units;
+use crate::units;
 
 pub struct Data {
     size: AtomicUsize,
@@ -16,11 +17,11 @@ pub struct Data {
 // TODO: Implement custom error types
 
 impl Data {
-    pub fn new(size: usize, chunk_count: usize) -> Self {
+    pub fn new(size: usize, chunk_count: usize, unit: Units) -> Self {
         Self {
             size: AtomicUsize::new(size),
-            human_readable_size: AtomicUsize::new(size),
-            unit: Arc::new(RwLock::new(Units::Byte)),
+            human_readable_size: AtomicUsize::new(units::readable_size(size).0.floor() as usize),
+            unit: Arc::new(RwLock::new(unit)),
             chunk_count: AtomicUsize::new(chunk_count),
             chunks: Arc::new(RwLock::new(
                 Vec::<(AtomicUsize, AtomicUsize)>::with_capacity(chunk_count),

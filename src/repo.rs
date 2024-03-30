@@ -85,40 +85,5 @@ pub fn get_wordlist_by_name_regex(name: &str) -> Result<Vec<Wordlist>> {
 }
 
 pub fn get_wordlist_by_name(name: &str) -> Result<Wordlist> {
-    let repo: Repo = load_repo()?;
-
-    debug!(
-        "Argument passed in `get_wordlist_by_name`: {}",
-        ansi_term::Color::Red.bold().underline().paint(name)
-    );
-
-    debug!("{:?}", repo.wordlists[0].get(name));
-
-    Ok(repo.wordlists[0].get_key_value(name).unwrap().1.clone())
-
-    // Ok(repo
-    //     .wordlists
-    //     .into_iter()
-    //     .find(|wordlist|
-    //         if let Some(_) = wordlist.get(name) {
-    //             true
-    //         } else {
-    //             false
-    //         })
-    //     .map(|wordlist| wordlist.values().cloned().next().unwrap())
-    //     .ok_or_else(|| eyre!("Wordlist not found"))?)
-
-    // repo.wordlists.iter().find(|wordlist| {
-    //     warn!("{:?}", wordlist.keys().next().unwrap());
-    //     wordlist.keys().next().unwrap() == name
-    // }).map(|wordlist| {
-    //     wordlist.values().cloned().next().unwrap()
-    // }).ok_or_else(|| eyre!("Wordlist not found"));
-
-    // Ok(repo
-    //     .wordlists
-    //     .into_iter()
-    //     .find(|wordlist| wordlist.keys().next().unwrap() == &format!("wordlists.{}", name))
-    //     .map(|wordlist| wordlist.values().cloned().next().unwrap())
-    //     .ok_or_eyre(eyre!("Wordlist not found"))?)
+    Ok(load_repo()?.wordlists[0].get_key_value(name).unwrap().1.clone())
 }
