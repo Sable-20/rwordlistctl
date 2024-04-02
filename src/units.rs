@@ -18,7 +18,6 @@ impl std::fmt::Display for Units {
             Units::Kb => write!(f, "KB"),
             Units::Gb => write!(f, "GB"),
             Units::Tb => write!(f, "TB"),
-            _ => Err(std::fmt::Error),
         }
     }
 }
@@ -34,7 +33,6 @@ pub fn get_unit(unit: &str) -> Units {
     }
 }
 
-#[allow(dead_code)]
 pub fn readable_size(size: usize) -> (f64, Units) {
     let mut counter: u8 = 0;
     let mut size: f64 = size as f64;
@@ -52,4 +50,14 @@ pub fn readable_size(size: usize) -> (f64, Units) {
     };
 
     (size, unit)
+}
+
+pub async fn convert_size(size: u64, unit: Units) -> u64 {
+    match unit {
+        Units::Byte => size,
+        Units::Mb => size * 1_000_000,
+        Units::Kb => size * 1_000,
+        Units::Gb => size * 1_000_000_000,
+        Units::Tb => size * 1_000_000_000_000,
+    }
 }

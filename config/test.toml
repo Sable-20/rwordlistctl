@@ -1,0 +1,36 @@
+[[wordlists]]
+[wordlists.deepmagic]
+name = "deepmagic"
+url = "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/deepmagic.com-prefixes-top50000.txt"
+size = 605.75
+unit = "kb"
+group = "discovery"
+
+[wordlists.dns-Jhaddix]
+name = "dns-Jhaddix"
+url = "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/dns-Jhaddix.txt"
+size = 26.57
+unit = "mb"
+group = "discovery"
+
+[wordlists.fierce-hostlist]
+name = "fierce-hostlist"
+name = "fierce-hostlist"
+url = "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/fierce-hostlist.txt"
+size = 14.68
+unit = "kb"
+group = "discovery"
+
+[wordlists.namelist]
+name = "namelist"
+url = "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/namelist.txt"
+size = 11.96
+unit = "kb"
+group = "discovery"
+
+[wordlists.shubs-stackoverflow]
+name = "shubs-stackoverflow"
+url = "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/shubs-stackoverflow.txt"
+size = 741.92
+unit = "kb"
+group = "discovery"

@@ -1,4 +1,8 @@
-use anyhow::Context;
+use color_eyre::{
+    eyre::{eyre, WrapErr},
+    Result,
+};
+use log::debug;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -8,52 +12,88 @@ pub struct Repo {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub(crate) struct Wordlist {
+pub struct Wordlist {
+    name: String,
     url: String,
-    size: usize,
+    size: f64,
     unit: String,
     group: String,
 }
 
-#[allow(dead_code)]
-fn load_repo() -> anyhow::Result<Repo> {
+impl Wordlist {
+    pub fn get_size(&self) -> f64 {
+        self.size
+    }
+
+    pub fn get_unit(&self) -> &str {
+        &self.unit
+    }
+
+    pub fn get_url(&self) -> &str {
+        &self.url
+    }
+
+    pub fn get_group(&self) -> &str {
+        &self.group
+    }
+
+    pub fn get_name(&self) -> &str {
+        &self.name
+    }
+}
+
+fn load_repo() -> Result<Repo> {
     let repo = toml::from_str::<Repo>(include_str!("../config/repo.toml"))
-        .with_context(|| format!("Failed to read repository from repo.toml"))?;
+        .wrap_err_with(|| eyre!("Failed to read repository from repo.toml"))?;
     Ok(repo)
 }
 
-#[allow(dead_code)]
-pub fn get_wordlist_by_group(group: &str) -> anyhow::Result<Vec<Wordlist>> {
+pub fn get_wordlist_by_group(group: String) -> Result<Vec<Wordlist>> {
     let repo: Repo = load_repo()?;
     let wordlists = repo
         .wordlists
         .into_iter()
-        .filter(|wordlist| wordlist.values().next().unwrap().group == group)
-        .map(|wordlist| wordlist.values().cloned().next().unwrap())
+        .filter(|wordlist| {
+            wordlist
+                .values()
+                .next()
+                .expect("Filter of grouips failed")
+                .group
+                == group
+        })
+        .map(|wordlist| {
+            wordlist
+                .values()
+                .next()
+                .cloned()
+                .expect("Map of groups failed")
+        })
         .collect::<Vec<Wordlist>>(); // Collect the wordlists into a vector
 
     Ok(wordlists)
 }
 
-#[allow(dead_code)]
-pub fn get_wordlist_by_name(name: &str) -> anyhow::Result<Wordlist> {
+pub fn get_wordlist_by_name_regex(name: &str) -> Result<Vec<Wordlist>> {
     let repo: Repo = load_repo()?;
-    let wordlist = repo
-        .wordlists
-        .into_iter()
-        .find(|wordlist| wordlist.keys().next().unwrap() == name)
-        .map(|wordlist| wordlist.values().cloned().next().unwrap());
-    match wordlist {
-        Some(wordlist) => Ok(wordlist),
-        None => anyhow::bail!("Wordlist not found"),
-    }
+
+    let re = regex::Regex::new(name).unwrap();
+    let results = repo.wordlists[0]
+        .keys()
+        .filter(|key| re.is_match(key))
+        .collect::<Vec<&String>>();
+
+    let ret = results
+        .iter()
+        .map(|key| repo.wordlists[0].get(*key).unwrap().clone())
+        .collect::<Vec<Wordlist>>();
+
+    Ok(ret)
 }
 
-// fn get_wordlist(key: &str) -> Result<toml::Value, ()> {
-//     if let Some(table) = toml::from_str::<Table>(include_str!("../config/repo.toml")).unwrap().get(key) {
-//        Ok(table.clone())
-//     } else {
-//         error!("Key not found in repo.toml");
-//         Err(())
-//     }
-// }
+pub fn get_wordlist_by_name(name: &str) -> Result<Wordlist> {
+    Ok(load_repo()?.wordlists[0]
+        .get_key_value(name)
+        .unwrap()
+        .1
+        .clone())
+}

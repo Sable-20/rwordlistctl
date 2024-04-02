@@ -6,4 +6,5 @@ use crate::args;
 pub(crate) enum Command {
     Fetch(args::FetchArgs),
     Search(args::SearchArgs),
+    List(args::ListArgs),
 }

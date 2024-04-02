@@ -1,4 +1,15 @@
-use clap::{value_parser, ArgAction, Args};
+use clap::{value_parser, ArgAction, Args, ValueEnum};
+
+use crate::config;
+
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug, ValueEnum)]
+pub enum Groups {
+    Usernames,
+    Passwords,
+    Discovery,
+    Fuzzing,
+    Misc,
+}
 
 #[derive(Args, Debug)]
 pub struct FetchArgs {
@@ -7,8 +18,7 @@ pub struct FetchArgs {
         long = "decompress",
         help = "Decompress and remove the archive file", 
         action = ArgAction::SetTrue,
-        default_value_t = true,
-        num_args = 0,
+        default_value_t = false,
     )]
     pub decompress: bool,
 
@@ -21,10 +31,9 @@ pub struct FetchArgs {
         require_equals = true,
         allow_negative_numbers = false,
         value_parser = value_parser!(u8).range(1..=100),
-        // .default_value_t()
-        default_value = "5",
+        default_value_t = config::get_worker_count(),
     )]
-    pub workers: Option<u8>,
+    pub workers: u8,
 
     #[arg(
         short = 'u',
@@ -35,7 +44,7 @@ pub struct FetchArgs {
         require_equals = true,
         default_value = "rwordlistctl/0.1.0"
     )]
-    pub user_agent: String,
+    pub user_agent: Option<String>,
 
     #[arg(
         short = 'b',
@@ -46,7 +55,7 @@ pub struct FetchArgs {
         require_equals = true,
         default_value = "/usr/share/wordlists"
     )]
-    pub base_dir: String,
+    pub base_dir: Option<String>,
 
     #[arg(
         short = 'l',
@@ -56,6 +65,7 @@ pub struct FetchArgs {
         num_args(1..),
         require_equals = true,
         value_delimiter = ',',
+        required = true,
     )]
     pub wordlists: Vec<String>,
 
@@ -67,13 +77,24 @@ pub struct FetchArgs {
         num_args(1..=5),
         require_equals = true,
         value_delimiter = ',',
-        value_parser(["usernames", "passwords", "discovery", "fuzzing", "misc"]),
+        value_enum
     )]
-    pub group: Vec<String>,
+    pub group: Option<Vec<Groups>>,
+
+    #[arg(
+        short = 'r',
+        long = "regex",
+        help = "Use regex to find wordlists with your search term contained within the name",
+        action = ArgAction::SetTrue,
+        default_value_t = false,
+    )]
+    pub regex: bool,
 }
 
 #[derive(Args, Debug)]
 pub struct SearchArgs {
+    search_term: String,
+
     #[arg(
         short = 'l',
         long = "local",
@@ -82,16 +103,30 @@ pub struct SearchArgs {
         num_args = 0,
     )]
     pub local: bool,
+    // #[arg(
+    //     short = 'f',
+    //     long = "fetch",
+    //     help = "Fetch wordlists from the repository at the given indexes",
+    //     action = ArgAction::Set,
+    //     num_args(1..),
+    //     require_equals = true,
+    //     value_delimiter = ',',
+    //     value_parser = value_parser!(u8).range(1..),
+    // )]
+    // pub fetch: Option<Vec<u8>>,
+}
 
+#[derive(Args, Debug)]
+pub struct ListArgs {
     #[arg(
-        short = 'f',
-        long = "fetch",
-        help = "Fetch wordlists from the repository at the given index",
-        action = ArgAction::Set,
-        num_args(1..),
+        short = 'g',
+        long = "group",
+        value_name = "GROUP",
+        help = "Group of wordlists to fetch",
+        num_args(1..=5),
         require_equals = true,
         value_delimiter = ',',
-        value_parser = value_parser!(u8).range(1..),
+        value_enum
     )]
-    pub fetch: u8,
+    pub group: Option<Vec<Groups>>,
 }
