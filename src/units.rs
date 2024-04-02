@@ -51,3 +51,13 @@ pub fn readable_size(size: usize) -> (f64, Units) {
 
     (size, unit)
 }
+
+pub async fn convert_size(size: u64, unit: Units) -> u64 {
+    match unit {
+        Units::Byte => size,
+        Units::Mb => size * 1_000_000,
+        Units::Kb => size * 1_000,
+        Units::Gb => size * 1_000_000_000,
+        Units::Tb => size * 1_000_000_000_000,
+    }
+}

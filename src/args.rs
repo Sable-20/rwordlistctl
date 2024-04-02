@@ -53,7 +53,7 @@ pub struct FetchArgs {
         help = "Base directory to store wordlists",
         num_args = 1,
         require_equals = true,
-        default_value = "/usr/share/wordlists",
+        default_value = "/usr/share/wordlists"
     )]
     pub base_dir: Option<String>,
 

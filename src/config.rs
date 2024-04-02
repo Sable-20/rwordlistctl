@@ -1,5 +1,5 @@
-use serde::{Serialize, Deserialize};
-use color_eyre::{eyre::eyre, Result, eyre::WrapErr};
+use color_eyre::{eyre::eyre, eyre::WrapErr, Result};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {

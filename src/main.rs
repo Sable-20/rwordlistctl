@@ -3,26 +3,27 @@ use std::{io::Write, path::PathBuf};
 use ansi_term::Color::Red;
 
 use clap::Parser;
-use color_eyre::{eyre::eyre, Result, eyre::ensure};
+use color_eyre::{eyre::ensure, eyre::eyre, Result};
 
 use pretty_env_logger::env_logger;
 
-use log::{debug, error, info, trace};
+use log::{debug, error, info, log, trace};
 
 use crate::repo::{get_wordlist_by_name, get_wordlist_by_name_regex};
 
 mod args;
-mod config;
 mod commands;
+mod config;
 mod data;
+mod fetch;
 mod repo;
 mod units;
 
 #[derive(Parser, Debug)]
 #[command(
-    version, 
-    about, 
-    long_about = None, 
+    version,
+    about,
+    long_about = None,
     author,
     arg_required_else_help = true,
     subcommand_required = true
@@ -41,12 +42,18 @@ struct RWordlistctl {
     command: Option<commands::Command>,
 }
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
+    let now = std::time::Instant::now();
+
     if std::path::Path::new("rwordlistctl.log").try_exists()? == false {
         std::fs::File::create("rwordlistctl.log")?;
     }
-    let log_file = Box::new(std::fs::OpenOptions::new().append(true).open("rwordlistctl.log")?);
-    
+    let log_file = Box::new(
+        std::fs::OpenOptions::new()
+            .append(true)
+            .open("rwordlistctl.log")?,
+    );
 
     match std::env::var("RUST_LOG_STYLE") {
         Ok(s) if s == "SYSTEMD" => {
@@ -105,16 +112,20 @@ fn main() -> Result<()> {
                     for list in args.wordlists.iter() {
                         for list in get_wordlist_by_name_regex(list)? {
                             println!("{:?}", list.get_url());
-                            // 
-                            // retrieve_file(list.get_url(), 
+                            info!("{:#?}", list);
+                            //
+                            // retrieve_file(list.get_url(),
                             //               args.decompress,
-                            //               args.base_dir.as_ref().unwrap(), 
+                            //               args.base_dir.as_ref().unwrap(),
                             //               args.user_agent.as_ref().unwrap()
-                            //               Data::new(list.get_size(), args.workers, get_unit(list.get_unit())).chunk_data()
+                            //               Data::new(list.get_size(), list.get_unit(), list.get_size() / args.workers
                             // )?;
 
+                            //  retrieve_file(list: Wordlist, decompress: bool, base_dir: &str, user_agent: &str)
+                            //
+
                             // retrieve_file function signature
-                            // fn retrieve_file(url: &str, decompress: bool, base_dir: &str, user_agent: &str, data: Data) -> Result<()>    
+                            // fn retrieve_file(url: &str, decompress: bool, base_dir: &str, user_agent: &str, data: Data) -> Result<()>
                         }
                     }
                     error!("Implement decompression");
@@ -124,7 +135,14 @@ fn main() -> Result<()> {
                     trace!("Regex only");
                     for list in args.wordlists.iter() {
                         for list in get_wordlist_by_name_regex(list)? {
-                            println!("{:?}", list.get_url());
+                            fetch::retrieve_file(
+                                list,
+                                args.decompress,
+                                args.base_dir.as_ref().unwrap(),
+                                args.user_agent.as_ref().unwrap(),
+                                args.workers as usize,
+                            )
+                            .await?;
                         }
                     }
                 }
@@ -138,20 +156,30 @@ fn main() -> Result<()> {
                     }
                 }
                 (false, false) => {
-                    todo!("Normal fetch");
+                    for list in args.wordlists.iter() {
+                        fetch::retrieve_file(
+                            get_wordlist_by_name(list)?,
+                            args.decompress,
+                            args.base_dir.as_ref().unwrap(),
+                            args.user_agent.as_ref().unwrap(),
+                            args.workers as usize,
+                        )
+                        .await?;
+                    }
+                    info!("File fetched successfully");
                 }
             }
-        },
+        }
         Some(commands::Command::Search(args)) => {
             debug!("Search args: {:#?}", args);
-        },
+        }
         Some(commands::Command::List(args)) => {
             debug!("List args: {:#?}", args);
-        },
+        }
         _ => unimplemented!(),
     }
 
     ensure!(cli.command.is_some(), eyre!("No command provided"));
-
+    info!("Time elapsed: {:.2?} seconds", now.elapsed().as_secs_f64());
     Ok(())
 }

@@ -13,6 +13,7 @@ pub struct Repo {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Wordlist {
+    name: String,
     url: String,
     size: f64,
     unit: String,
@@ -34,6 +35,10 @@ impl Wordlist {
 
     pub fn get_group(&self) -> &str {
         &self.group
+    }
+
+    pub fn get_name(&self) -> &str {
+        &self.name
     }
 }
 
@@ -59,7 +64,8 @@ pub fn get_wordlist_by_group(group: String) -> Result<Vec<Wordlist>> {
         .map(|wordlist| {
             wordlist
                 .values()
-                .next().cloned()
+                .next()
+                .cloned()
                 .expect("Map of groups failed")
         })
         .collect::<Vec<Wordlist>>(); // Collect the wordlists into a vector
@@ -85,5 +91,9 @@ pub fn get_wordlist_by_name_regex(name: &str) -> Result<Vec<Wordlist>> {
 }
 
 pub fn get_wordlist_by_name(name: &str) -> Result<Wordlist> {
-    Ok(load_repo()?.wordlists[0].get_key_value(name).unwrap().1.clone())
+    Ok(load_repo()?.wordlists[0]
+        .get_key_value(name)
+        .unwrap()
+        .1
+        .clone())
 }

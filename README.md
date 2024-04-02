@@ -20,6 +20,9 @@ TODO: INSERT HELP VIEW HERE
 
 TODO: Write tests
 
+TODO: Convert all `eyre!` calls to handled errors instead of panicking
+
+TODO: implement deflation
 
 TODO: REDO OPTIONS HERE
 ----------
