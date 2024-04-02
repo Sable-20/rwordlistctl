@@ -74,6 +74,8 @@ pub async fn retrieve_file(
 
     let client = reqwest::Client::builder()
         .user_agent(user_agent)
+        .gzip(compress)
+        .brotli(compress)
         .deflate(decompress)
         .build()
         .wrap_err_with(|| eyre!("Failed to create reqwest client"))?;
