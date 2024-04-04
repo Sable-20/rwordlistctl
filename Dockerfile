@@ -1,14 +1,16 @@
 FROM rust:latest as builder
 WORKDIR /usr/src/rwordlistctl
 COPY . .
+RUN install -Dv /dev/null /usr/share/wordlistctl/.config/config.toml
+#RUN mkdir -p /usr/share/wordlistctl/.config
+#RUN touch /usr/share/wordlistctl/.config/config.toml
+RUN cp config/config.toml /usr/share/wordlistctl/.config/config.toml
 RUN cargo install --path .
 
-FROM debian:bullseye-slim
-RUN apt-get update && \
-    apt-get install -y extra-runtime-dependencies && \
-    rm -rf /var/lib/apt/lists/*
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y libssl-dev && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/local/cargo/bin/rwordlistctl /usr/local/bin/rwordlistctl
-CMD ["rwordlistctl"]
+ENTRYPOINT ["rwordlistctl"]
 
 # FROM python:alpine
 

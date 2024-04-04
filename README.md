@@ -14,6 +14,12 @@ In the latest version of the Blackarch Linux it has been added to
 
 ## Usage
 
+### With Docker
+note: doesnt work rn, fixing with rustls-tls
+```sh
+docker run --rm -it --mount "type=bind,src=$pwd/testing,target=/testing/usr/share/wordlists" --network host rwordlistctl <COMMANDS>
+```
+
 TODO: FIX below, use mangen
 
 TODO: INSERT HELP VIEW HERE
