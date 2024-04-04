@@ -15,12 +15,14 @@ clap = { version = "4.5.3", features = ["cargo", "derive"] }
 color-eyre = "0.6.3"
 env_logger = "0.11.3"
 error-chain = "0.12.4"
+flate2 = "1.0.28"
 futures = "0.3.30"
 log = "0.4.21"
 pretty_env_logger = "0.5.0"
 regex = "1.10.4"
 reqwest = { version = "0.12.2", features = ["gzip", "deflate", "stream", "blocking", "brotli"] }
 serde = { version = "1.0.197", features = ["derive"] }
+tar = "0.4.40"
 tokio = { version = "1.37.0", features = ["full"] }
 toml = "0.8.12"
 

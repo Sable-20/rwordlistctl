@@ -25,8 +25,8 @@ mod units;
     about,
     long_about = None,
     author,
-    arg_required_else_help = true,
-    subcommand_required = true
+    // arg_required_else_help = true,
+    // subcommand_required = true
 )]
 struct RWordlistctl {
     #[arg(
@@ -34,7 +34,7 @@ struct RWordlistctl {
         long = "config",
         value_name = "CONFIG",
         help = "Path to the configuration file",
-        default_value = "config/config.toml"
+        default_value = "/usr/share/rwordlistctl/.config/config.toml"
     )]
     config: Option<PathBuf>,
 
@@ -136,7 +136,7 @@ async fn main() -> Result<()> {
                     for list in args.wordlists.iter() {
                         for list in get_wordlist_by_name_regex(list)? {
                             fetch::retrieve_file(
-                                list,
+                                &list,
                                 args.decompress,
                                 args.base_dir.as_ref().unwrap(),
                                 args.user_agent.as_ref().unwrap(),
@@ -148,17 +148,29 @@ async fn main() -> Result<()> {
                 }
                 (false, true) => {
                     for list in args.wordlists.iter() {
-                        if get_wordlist_by_name(list).is_err() {
-                            return Err(eyre!("Failed to fetch wordlist"));
+                        if let Ok(list) = get_wordlist_by_name(list) {
+                           fetch::retrieve_file(
+                                &list, 
+                                args.decompress, 
+                                args.base_dir.as_ref().unwrap(), 
+                                args.user_agent.as_ref().unwrap(),
+                                args.workers as usize
+                            )
+                            .await?;
                         } else {
-                            println!("{:?}", get_wordlist_by_name(list)?.get_url());
+                            error!("Failed to fetch wordlist");
                         }
+                        // if get_wordlist_by_name(list).is_err() {
+                        //     return Err(eyre!("Failed to fetch wordlist"));
+                        // } else {
+                        //     println!("{:?}", get_wordlist_by_name(list)?.get_url());
+                        // }
                     }
                 }
                 (false, false) => {
                     for list in args.wordlists.iter() {
                         fetch::retrieve_file(
-                            get_wordlist_by_name(list)?,
+                            &get_wordlist_by_name(&list)?,
                             args.decompress,
                             args.base_dir.as_ref().unwrap(),
                             args.user_agent.as_ref().unwrap(),
@@ -176,10 +188,11 @@ async fn main() -> Result<()> {
         Some(commands::Command::List(args)) => {
             debug!("List args: {:#?}", args);
         }
-        _ => unimplemented!(),
+        &None => {
+            return Err(eyre!("No command provided"));
+        }
     }
 
-    ensure!(cli.command.is_some(), eyre!("No command provided"));
     info!("Time elapsed: {:.2?} seconds", now.elapsed().as_secs_f64());
     Ok(())
 }

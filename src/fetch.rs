@@ -4,6 +4,7 @@ use color_eyre::{
     Result,
 };
 use log::{info, trace};
+use regex::Regex;
 use reqwest::header::{HeaderValue, CONTENT_LENGTH, RANGE};
 use reqwest::StatusCode;
 use std::str::FromStr;
@@ -54,13 +55,13 @@ impl Iterator for PartialRangeIter {
 }
 
 pub async fn retrieve_file(
-    list: crate::repo::Wordlist,
+    list: &crate::repo::Wordlist,
     decompress: bool,
     base_dir: &str,
     user_agent: &str,
     worker_count: usize,
 ) -> Result<()> {
-    assert!(!std::path::Path::new(list.get_name())
+    assert!(!std::path::Path::new(&format!("./testing/{}/{}", base_dir, list.get_name()))
         .try_exists()
         .expect("File already exists"));
     log::debug!("{}", list.get_url());
@@ -131,6 +132,35 @@ pub async fn retrieve_file(
         let bytes = res.bytes().await?;
         std::io::copy(&mut bytes.as_ref(), &mut output_file)?;
     }
+
+    if !decompress {
+        info!("Finished with success");
+        return Ok(());
+    }
+
+    let re = Regex::new(r"\.tar\.gz$").unwrap();
+    let gz_re = Regex::new(r"\.gz$").unwrap();
+
+    if re.is_match(list.get_url()) {
+        info!("Decompressing file");
+        let tar_gz = std::fs::File::open(format!("./testing/{}/{}", base_dir, list.get_name()))?;
+        let tar = flate2::read::GzDecoder::new(tar_gz);
+        let mut archive = tar::Archive::new(tar);
+        archive.unpack(format!("./testing/{}", base_dir))?;
+    } else if gz_re.is_match(list.get_url()) {
+        info!("Decompressing file");
+        let gz = std::io::BufReader::new(std::fs::File::open(format!("./{}/{}", base_dir, list.get_name()))?);
+        //let mut output = std::fs::File::create(format!("./testing/{}/{}", base_dir, list.get_name()))?;
+        
+        let mut decoder = flate2::bufread::GzDecoder::new(gz);
+        let mut buffer = Vec::new();
+        std::io::copy(&mut decoder, &mut buffer)?;
+        std::fs::write(format!("./testing/{}/{}", base_dir, list.get_name()), &buffer)?;
+        // std::io::copy(&mut decoder, &mut output)?;
+        //std::fs::write(format!("./testing/{}/{}", base_dir, list.get_name()), &mut decoder)?;
+    }
+
+    std::fs::remove_file(format!("./testing/{}/{}", base_dir, list.get_name()))?;
 
     let _content = response.text().await?;
 
