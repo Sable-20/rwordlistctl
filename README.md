@@ -61,6 +61,14 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
+    <li>
+        <a href="#commands">Commands</a>
+        <ul>
+            <li><a href="#fetch">Fetch</a></li> 
+            <li><a href="#search">Search</a></li> 
+            <li><a href="#list">List</a></li> 
+        </ul>
+    </li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -142,8 +150,11 @@ How to install and use this project
     touch ~/.config/rwordlistctl/repo.toml && touch ~/.config/rwordlistctl/config.toml && curl -o ~/.config/rwordlistctl/repo.toml https://raw.githubusercontent.com/Sable-20/rwordlistctl/master/config/repo.toml && curl -o ~/.config/rwordlistctl/config.toml https://raw.githubusercontent.com/Sable-20/rwordlistctl/master/config/config.toml
     ```
 
-#### Building on Docker 
-TODO
+#### With docker
+Simply run:
+```sh
+docker build -t <image-name> .
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -152,22 +163,80 @@ TODO
 ## Usage
 
 #### Locally
-TODO
+Once the binary is built, ensure that it is in your path by running `rwordlistctl` or `wordlistctl` (if you have aliased the command or have installed via `pacman` where it is aliased automatically).
+
+Once you know that the command is working you can run:
+```sh
+rwordlistctl [OPTIONS] [COMMAND]
+```
+
+The help is as follows:
+```sh
+                                        --==[ rwordlistctl by Blackarch Linux ]==--
+Rust rewrite of wordlistctl: Fetch, install and search wordlist archives from websites.
+
+Usage: rwordlistctl [OPTIONS] [COMMAND]
+
+Commands:
+  fetch
+  search
+  list
+  help    Print this message or the help of the given subcommand(s)
+
+Options:
+  -c, --config <CONFIG>  Path to the configuration file [default: /usr/share/rwordlistctl/.config/config.toml]
+  -h, --help             Print help
+  -V, --version          Print version
+```
 
 #### With Docker
-TODO
+If you wish to load into a fresh shell within the docker container where the wordlists will be sandboxed and not be loaded onto your host system you may run:
+```sh
+docker run --rm -ti <image-name>
+```
+
+If you wish to connect the container to your host machine so that wordlists will be downloaded to your machine you may run:
+```sh
+docker run --rm -it --mount "type=bind,src=/usr/share/wordlists,target=/usr/share/wordlists" <image-name>
+```
+This will make it so that any wordlists downloaded in the container will also be downloaded into `/usr/share/wordlists`!
+
+From here refer back to `running locally`
 
 
 _For more examples, please refer to the [Documentation](https://example.com)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- Commands -->
+## Commands
+Below is the help for various commands and explanations for each/
 
+### Fetch
+```sh
+                                    --==[ rwordlistctl by Blackarch Linux ]==--
+Usage: rwordlistctl.exe fetch [OPTIONS] --wordlist=<WORDLISTS>...
+
+Options:
+  -d, --decompress               Decompress and remove the archive file
+  -w, --workers=<COUNT>          Number of download workers [default: 10]
+  -u, --user-agent=<USER_AGENT>  User agent to use for fetching [default: rwordlistctl/0.1.0]
+  -b, --base-dir=<BASE_DIR>      Base directory to store wordlists [default: /usr/share/wordlists]
+  -l, --wordlist=<WORDLISTS>...  Wordlist to fetch
+  -g, --group=<GROUP>...         Group of wordlists to fetch [possible values: usernames, passwords, discovery, fuzzing, misc]
+  -r, --regex                    Use regex to find wordlists with your search term contained within the name
+  -h, --help                     Print help
+```
+
+### Search
+
+### List
 
 <!-- ROADMAP -->
 ## Roadmap
 
 - [ ] Use mangen to generate man pages
+- [ ] Implement custom config file (TOML format)
 - [ ] Write tests
 - [ ] Write proper documentation
 - [ ] Multi-language Documentation
@@ -287,131 +356,4 @@ In the latest version of the Blackarch Linux it has been added to
 
 `pacman -S rwordlistctl`
 
-## Usage
 
-### With Docker
-note: doesnt work rn, fixing with rustls-tls
-```sh
-docker run --rm -it --mount "type=bind,src=$pwd/testing,target=/testing/usr/share/wordlists" --network host rwordlistctl <COMMANDS>
-```
-
-TODO: FIX below, use mangen
-
-TODO: INSERT HELP VIEW HERE
-
-TODO: Write tests
-
-TODO: Convert all `eyre!` calls to handled errors instead of panicking
-
-TODO: implement deflation
-
-TODO: REDO OPTIONS HERE
-----------
-### Fetch Options
-```
-$ wordlistctl fetch [-h] [-l WORDLIST [WORDLIST ...]]
-                         [-g {usernames,passwords,discovery,fuzzing,misc} [{usernames,passwords,discovery,fuzzing,misc} ...]]
-                         [-d] [-w WORKERS] [-u USERAGENT] [-b BASEDIR] fetch_term
-
-positional arguments:
-  fetch_term           fetch string filter
-
-optional arguments:
-  -h, --help            show this help message and exit
-
-  -l WORDLIST [WORDLIST ...], --wordlist WORDLIST [WORDLIST ...]
-                        wordlist to fetch
-
-  -g, --group {group} [{group} ...]
-                        wordlist group to fetch
-                        available groups:
-                          usernames
-                          passwords
-                          discovery
-                          fuzzing
-                          misc
-
-  -d, --decompress      decompress and remove archive
-
-  -w WORKERS, --workers WORKERS
-                        download workers [default: 10]
-
-  -u USERAGENT, --useragent USERAGENT
-                        fetch user agent [default: wordlistctl/v0.9.x]
-
-  -b BASEDIR, --base-dir BASEDIR
-                        wordlists base directory [default: /usr/share/wordlists]
-
-```
-
-
-### Search Options
-```
-$ wordlistctl search  [-h] [-l] [-b BASEDIR] search_term
-
-positional arguments:
-  search_term           what to search
-
-optional arguments:
-  -h, --help            show this help message and exit
-
-  -l, --local           search local archives
-
-  -b BASEDIR, --base-dir BASEDIR
-                        wordlists base directory [default: /usr/share/wordlists]
-
-  -f INDEX [INDEX ...], --fetch INDEX [INDEX ...]
-                        fetch the wordlists at the given indexes in the search results, see
-                        fetch options for additional options
-
-fetch options:
-  -d, --decompress      decompress and remove archive
-
-  -w WORKERS, --workers WORKERS
-                        download workers [default: 10]
-
-  -u USERAGENT, --useragent USERAGENT
-                        parser user agent [default: wordlistctl/v0.9.x]
-```
-
-### List Options
-```
-$ wordlistctl list [-h] [-g {usernames,passwords,discovery,fuzzing,misc}]
-
-optional arguments:
-  -h, --help            show this help message and exit
-
-  -g, --group {group}
-                        show all wordlists in group
-                        available groups:
-                          usernames
-                          passwords
-                          discovery
-                          fuzzing
-                          misc
-
-  -f INDEX [INDEX ...], --fetch INDEX [INDEX ...]
-                        fetch the wordlists at the given indexes in the list, see
-                        fetch options for additional options
-
-fetch options:
-  -d, --decompress      decompress and remove archive
-
-  -w WORKERS, --workers WORKERS
-                        download workers [default: 10]
-
-  -u USERAGENT, --useragent USERAGENT
-                        parser user agent [default: wordlistctl/v0.9.x]
-```
-
-## Get Involved
-
-You can get in touch with the BlackArch Linux team. Just check out the following:
-
-**Please, send us pull requests!**
-
-**Web:** https://www.blackarch.org/
-
-**Mail:** team@blackarch.org
-
-**IRC:** [irc://irc.freenode.net/blackarch](irc://irc.freenode.net/blackarch)

@@ -25,19 +25,18 @@ mod units;
     about,
     long_about = None,
     author,
-    // arg_required_else_help = true,
-    // subcommand_required = true
+    arg_required_else_help = true,
+    subcommand_required = true
 )]
 struct RWordlistctl {
-    #[arg(
-        short = 'c',
-        long = "config",
-        value_name = "CONFIG",
-        help = "Path to the configuration file",
-        default_value = "/usr/share/rwordlistctl/.config/config.toml",
-        // "/usr/share/rwordlistctl/.config/config.toml"
-    )]
-    config: Option<PathBuf>,
+    // #[arg(
+    //     short = 'c',
+    //     long = "config",
+    //     value_name = "CONFIG",
+    //     help = "Path to the configuration file",
+    //     default_value = "/usr/share/rwordlistctl/.config/config.toml",
+    // )]
+    // config: Option<PathBuf>,
 
     #[command(subcommand)]
     command: Option<commands::Command>,
@@ -95,10 +94,6 @@ async fn main() -> Result<()> {
     #[allow(unused_variables)]
     let cli: RWordlistctl = RWordlistctl::parse();
 
-    if let Some(config) = cli.config {
-        info!("Using configuration file: {:?}", config);
-    }
-
     match &cli.command {
         Some(commands::Command::Fetch(args)) => {
             trace!("Fetch called!");
@@ -112,25 +107,16 @@ async fn main() -> Result<()> {
                     trace!("Decompress and regex");
                     for list in args.wordlists.iter() {
                         for list in get_wordlist_by_name_regex(list)? {
-                            println!("{:?}", list.get_url());
-                            info!("{:#?}", list);
-                            //
-                            // retrieve_file(list.get_url(),
-                            //               args.decompress,
-                            //               args.base_dir.as_ref().unwrap(),
-                            //               args.user_agent.as_ref().unwrap()
-                            //               Data::new(list.get_size(), list.get_unit(), list.get_size() / args.workers
-                            // )?;
-
-                            //  retrieve_file(list: Wordlist, decompress: bool, base_dir: &str, user_agent: &str)
-                            //
-
-                            // retrieve_file function signature
-                            // fn retrieve_file(url: &str, decompress: bool, base_dir: &str, user_agent: &str, data: Data) -> Result<()>
+                            fetch::retrieve_file(
+                                &list,
+                                args.decompress,
+                                args.base_dir.as_ref().unwrap(),
+                                args.user_agent.as_ref().unwrap(),
+                                args.workers as usize,
+                            )
+                            .await?;
                         }
                     }
-                    error!("Implement decompression");
-                    return Err(eyre!("Decompression not implemented"));
                 }
                 (true, false) => {
                     trace!("Regex only");
@@ -161,11 +147,6 @@ async fn main() -> Result<()> {
                         } else {
                             error!("Failed to fetch wordlist");
                         }
-                        // if get_wordlist_by_name(list).is_err() {
-                        //     return Err(eyre!("Failed to fetch wordlist"));
-                        // } else {
-                        //     println!("{:?}", get_wordlist_by_name(list)?.get_url());
-                        // }
                     }
                 }
                 (false, false) => {

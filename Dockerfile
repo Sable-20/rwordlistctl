@@ -2,13 +2,7 @@ FROM rust:latest as builder
 WORKDIR /usr/src/rwordlistctl
 COPY . .
 RUN install -Dv /dev/null /usr/share/wordlistctl/.config/config.toml
-RUN install -Dv /dev/null ~/.config/rwordlistctl/config.toml
-
-##### 
-# remove config in /usr/share thats weird, repo can be kept though
-####
 RUN cp config/config.toml /usr/share/wordlistctl/.config/config.toml
-RUN cp config/config.toml ~/.config/rwordlistctl/config.toml
 # sed command
 # -i to change it in the file
 # s for substitution
@@ -20,6 +14,7 @@ RUN cargo install --path .
 
 FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y libssl-dev && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /usr/share/wordlistctl/.config/config.toml /usr/share/wordlistctl/.config/config.toml
 COPY --from=builder /usr/local/cargo/bin/rwordlistctl /usr/local/bin/rwordlistctl
 ENTRYPOINT ["/bin/bash"]
 # ENTRYPOINT ["rwordlistctl"]
