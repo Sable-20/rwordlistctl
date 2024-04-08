@@ -33,7 +33,7 @@
     <a href="https://github.com/Sable-20/rwordlistctl"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a> -->
+    <!-- <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a> --> 
     ·
     <a href="https://github.com/Sable-20/rwordlistctl/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
