@@ -22,7 +22,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Sable-20/rwordlistctl">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="assets/images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">RWordlistctl</h3>
