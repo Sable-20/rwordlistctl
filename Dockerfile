@@ -6,7 +6,7 @@ RUN install -Dv /dev/null /usr/share/wordlistctl/.config/config.toml
 #RUN touch /usr/share/wordlistctl/.config/config.toml
 RUN cp config/config.toml /usr/share/wordlistctl/.config/config.toml
 # reqwest = { version = "0.12.2", features = ["gzip", "deflate", "stream", "blocking", "brotli"] }
-RUN sed -i 's/^reqwest = { version = "\(\d*\.*\d*\.*\d*\)", features = \[\("gzip", "deflate", "stream", "blocking", "brotli"\)\] }/reqwest = { version = "\1", default-features = false, features = \["http2", "rustls-tls", \2\] }' Cargo.toml
+RUN sed -i 's/reqwest = { version = "\(.*\)", features = \[\("gzip", "deflate", "stream", "blocking", "brotli"\)\] }/reqwest = { version = "\1", default-features = false, features = \["http2", "rustls-tls", \2\] }' Cargo.toml
 RUN cargo install --path .
 
 FROM debian:bookworm-slim
