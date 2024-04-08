@@ -34,7 +34,8 @@ struct RWordlistctl {
         long = "config",
         value_name = "CONFIG",
         help = "Path to the configuration file",
-        default_value = "/usr/share/rwordlistctl/.config/config.toml"
+        default_value = "/usr/share/rwordlistctl/.config/config.toml",
+        // "/usr/share/rwordlistctl/.config/config.toml"
     )]
     config: Option<PathBuf>,
 

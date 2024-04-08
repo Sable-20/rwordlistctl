@@ -61,7 +61,7 @@ pub async fn retrieve_file(
     user_agent: &str,
     worker_count: usize,
 ) -> Result<()> {
-    assert!(!std::path::Path::new(&format!("./testing/{}/{}", base_dir, list.get_name()))
+    assert!(!std::path::Path::new(&format!("/{}/{}", base_dir, list.get_name()))
         .try_exists()
         .expect("File already exists"));
     log::debug!("{}", list.get_url());
@@ -85,13 +85,13 @@ pub async fn retrieve_file(
     let length = response.headers().get(CONTENT_LENGTH);
 
     // REMOVE TESTING IN RELEASE
-    if !std::path::Path::new(&format!("./testing/{}", base_dir)).is_dir() {
-        std::fs::create_dir_all(&format!("./testing/{}", base_dir))?;
+    if !std::path::Path::new(&base_dir).is_dir() {
+        std::fs::create_dir_all(&base_dir)?;
     }
 
     // REMOVE TESTING IN RELEASE
     let mut output_file =
-        std::fs::File::create(format!("./testing/{}/{}", base_dir, list.get_name()))
+        std::fs::File::create(format!("/{}/{}", base_dir, list.get_name()))
             .wrap_err_with(|| eyre!("Failed to create file"))?;
     // FOR DEBUGGING
 
@@ -143,24 +143,24 @@ pub async fn retrieve_file(
 
     if re.is_match(list.get_url()) {
         info!("Decompressing file");
-        let tar_gz = std::fs::File::open(format!("./testing/{}/{}", base_dir, list.get_name()))?;
+        let tar_gz = std::fs::File::open(format!("/{}/{}", base_dir, list.get_name()))?;
         let tar = flate2::read::GzDecoder::new(tar_gz);
         let mut archive = tar::Archive::new(tar);
-        archive.unpack(format!("./testing/{}", base_dir))?;
+        archive.unpack(format!("/{}", base_dir))?;
     } else if gz_re.is_match(list.get_url()) {
         info!("Decompressing file");
-        let gz = std::io::BufReader::new(std::fs::File::open(format!("./{}/{}", base_dir, list.get_name()))?);
+        let gz = std::io::BufReader::new(std::fs::File::open(format!("/{}/{}", base_dir, list.get_name()))?);
         //let mut output = std::fs::File::create(format!("./testing/{}/{}", base_dir, list.get_name()))?;
         
         let mut decoder = flate2::bufread::GzDecoder::new(gz);
         let mut buffer = Vec::new();
         std::io::copy(&mut decoder, &mut buffer)?;
-        std::fs::write(format!("./testing/{}/{}", base_dir, list.get_name()), &buffer)?;
+        std::fs::write(format!("/{}/{}", base_dir, list.get_name()), &buffer)?;
         // std::io::copy(&mut decoder, &mut output)?;
         //std::fs::write(format!("./testing/{}/{}", base_dir, list.get_name()), &mut decoder)?;
     }
 
-    std::fs::remove_file(format!("./testing/{}/{}", base_dir, list.get_name()))?;
+    std::fs::remove_file(format!("/{}/{}", base_dir, list.get_name()))?;
 
     let _content = response.text().await?;
 
