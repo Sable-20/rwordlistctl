@@ -19,3 +19,4 @@ Cargo.lock
 rwordlistctl.log
 testing/
 testing/*
+*.lock
