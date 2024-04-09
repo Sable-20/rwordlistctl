@@ -1,6 +1,6 @@
 [package]
 name = "rwordlistctl"
-version = "0.10.0-alpha.1.5.0"
+version = "0.10.0-alpha.1.6.0"
 edition = "2021"
 authors = ["Sable-20", "blackarch"]
 description = "Rust rewrite of wordlistctl: Fetch, install and search wordlist archives from websites."
