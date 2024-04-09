@@ -84,24 +84,13 @@ pub async fn retrieve_file(
 
     let length = response.headers().get(CONTENT_LENGTH);
 
-    // REMOVE TESTING IN RELEASE
     if !std::path::Path::new(&base_dir).is_dir() {
         std::fs::create_dir_all(&base_dir)?;
     }
 
-    // REMOVE TESTING IN RELEASE
     let mut output_file =
         std::fs::File::create(format!("/{}/{}", base_dir, list.get_name()))
             .wrap_err_with(|| eyre!("Failed to create file"))?;
-    // FOR DEBUGGING
-
-    // if !std::path::Path::new("./testing/").is_dir() {
-    //     std::fs::create_dir_all("./testing")?;
-    // }
-
-    // let mut output_file = std::fs::File::create(format!("./testing/{}", list.get_name()))
-    //     .wrap_err_with(|| eyre!("Failed to create file"))?;
-
     info!("Starting download of {}", list.get_name());
     // fix types for length
     let length = if let Some(length) = length {
@@ -147,20 +136,19 @@ pub async fn retrieve_file(
         let tar = flate2::read::GzDecoder::new(tar_gz);
         let mut archive = tar::Archive::new(tar);
         archive.unpack(format!("/{}", base_dir))?;
+        std::fs::remove_file(format!("/{}/{}", base_dir, list.get_name()))?;
     } else if gz_re.is_match(list.get_url()) {
         info!("Decompressing file");
         let gz = std::io::BufReader::new(std::fs::File::open(format!("/{}/{}", base_dir, list.get_name()))?);
-        //let mut output = std::fs::File::create(format!("./testing/{}/{}", base_dir, list.get_name()))?;
         
         let mut decoder = flate2::bufread::GzDecoder::new(gz);
         let mut buffer = Vec::new();
         std::io::copy(&mut decoder, &mut buffer)?;
         std::fs::write(format!("/{}/{}", base_dir, list.get_name()), &buffer)?;
-        // std::io::copy(&mut decoder, &mut output)?;
-        //std::fs::write(format!("./testing/{}/{}", base_dir, list.get_name()), &mut decoder)?;
+        std::fs::remove_file(format!("/{}/{}", base_dir, list.get_name()))?;
     }
 
-    std::fs::remove_file(format!("/{}/{}", base_dir, list.get_name()))?;
+    // std::fs::remove_file(format!("/{}/{}", base_dir, list.get_name()))?;
 
     let _content = response.text().await?;
 

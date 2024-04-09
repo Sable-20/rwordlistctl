@@ -2,7 +2,6 @@ use color_eyre::{
     eyre::{eyre, WrapErr},
     Result,
 };
-use log::debug;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -48,27 +47,13 @@ fn load_repo() -> Result<Repo> {
     Ok(repo)
 }
 
-pub fn get_wordlist_by_group(group: String) -> Result<Vec<Wordlist>> {
+pub fn get_wordlist_by_group(group: crate::args::Groups) -> Result<Vec<Wordlist>> {
     let repo: Repo = load_repo()?;
-    let wordlists = repo
-        .wordlists
-        .into_iter()
-        .filter(|wordlist| {
-            wordlist
-                .values()
-                .next()
-                .expect("Filter of grouips failed")
-                .group
-                == group
-        })
-        .map(|wordlist| {
-            wordlist
-                .values()
-                .next()
-                .cloned()
-                .expect("Map of groups failed")
-        })
-        .collect::<Vec<Wordlist>>(); // Collect the wordlists into a vector
+    let wordlists = repo.wordlists[0]
+        .values()
+        .filter(|wordlist| wordlist.get_group() == group.to_string())
+        .cloned()
+        .collect::<Vec<Wordlist>>();
 
     Ok(wordlists)
 }

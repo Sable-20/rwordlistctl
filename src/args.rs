@@ -1,4 +1,5 @@
 use clap::{value_parser, ArgAction, Args, ValueEnum};
+use std::fmt;
 
 use crate::config;
 
@@ -9,6 +10,18 @@ pub enum Groups {
     Discovery,
     Fuzzing,
     Misc,
+}
+
+impl fmt::Display for Groups {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Usernames => write!(f, "usernames"),
+            Self::Passwords => write!(f, "passwords"),
+            Self::Discovery => write!(f, "discovery"),
+            Self::Fuzzing => write!(f, "fuzzing"),
+            Self::Misc => write!(f, "misc"),
+        }
+    }
 }
 
 #[derive(Args, Debug)]
@@ -129,4 +142,28 @@ pub struct ListArgs {
         value_enum
     )]
     pub group: Option<Vec<Groups>>,
+
+    #[arg(
+        short = 'n',
+        long = "number",
+        value_name = "NUMBER",
+        help = "Number of wordlists to display",
+        num_args = 1,
+        require_equals = true,
+        value_parser = value_parser!(u8).range(1..=100),
+        default_value_t = 10,
+    )]
+    pub number: u8,
+
+    #[arg(
+        short = 'f',
+        long = "fetch",
+        help = "Fetch wordlists from the repository at the given indexes",
+        action = ArgAction::Set,
+        num_args(1),
+        require_equals = true,
+        value_parser = value_parser!(bool),
+        default_value_t = false,
+    )]
+    pub fetch: bool,
 }

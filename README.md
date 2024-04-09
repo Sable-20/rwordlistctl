@@ -236,6 +236,7 @@ Options:
 ## Roadmap
 
 - [ ] Use mangen to generate man pages
+- [ ] Determine if `list` and `search` are redundant and if we should remove
 - [ ] Implement custom config file (TOML format)
 - [ ] Write tests
 - [ ] Write proper documentation

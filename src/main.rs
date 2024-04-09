@@ -1,13 +1,13 @@
-use std::{io::Write, path::PathBuf};
+use std::io::Write;
 
 use ansi_term::Color::Red;
 
 use clap::Parser;
-use color_eyre::{eyre::ensure, eyre::eyre, Result};
+use color_eyre::{eyre::eyre, Result};
 
 use pretty_env_logger::env_logger;
 
-use log::{debug, error, info, log, trace};
+use log::{debug, error, info, trace};
 
 use crate::repo::{get_wordlist_by_name, get_wordlist_by_name_regex};
 
@@ -78,8 +78,14 @@ async fn main() -> Result<()> {
                 .init();
             info!("Using systemd syslog friendly logging");
         }
+        #[cfg(debug_assertions)]
         _ => pretty_env_logger::formatted_builder()
             .filter_level(log::LevelFilter::Trace)
+            .target(env_logger::Target::Stdout)
+            .init(),
+        #[cfg(not(debug_assertions))]
+        _ => pretty_env_logger::formatted_builder()
+            .filter_level(log::LevelFilter::Warn)
             .target(env_logger::Target::Stdout)
             .init(),
     }
@@ -107,6 +113,7 @@ async fn main() -> Result<()> {
                     trace!("Decompress and regex");
                     for list in args.wordlists.iter() {
                         for list in get_wordlist_by_name_regex(list)? {
+                            // println!("Fetching: {}", list.get_name());
                             fetch::retrieve_file(
                                 &list,
                                 args.decompress,
@@ -169,6 +176,37 @@ async fn main() -> Result<()> {
         }
         Some(commands::Command::List(args)) => {
             debug!("List args: {:#?}", args);
+            if !args.fetch {
+                for groups in args.group.iter() {
+                    for group in groups {
+                        let lists = repo::get_wordlist_by_group(*group)?;
+                        let names = lists
+                            .iter()
+                            .map(|list| list.get_name().to_owned())
+                            .collect::<Vec<String>>();
+                        println!("Possible lists: {:#?}\n\nWith {} more options", &names[0..args.number as usize], &names.len() - args.number as usize);
+                        info!("Size of lists: {:?}", &lists.iter().map(|list| list.get_size()).collect::<Vec<f64>>()[0..args.number as usize]);
+                    }
+                }
+                return Ok(());
+            }
+            for groups in args.group.iter() {
+                for group in groups {
+                    let lists = repo::get_wordlist_by_group(*group)?;
+                    for list in lists {
+                        // use config to get the base dir and user agent
+                        crate::fetch::retrieve_file(
+                            &list,
+                            true,
+                            "/usr/share/wordlists",
+                            "rwordlistctl/0.1.0",
+                            config::get_worker_count() as usize,
+                        )
+                        .await?;
+                    }
+                }
+            }
+            return Ok(());
         }
         &None => {
             return Err(eyre!("No command provided"));
