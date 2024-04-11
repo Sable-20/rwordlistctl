@@ -105,7 +105,7 @@ This is a Rust rewrite of the original tool: `wordlistctl`. The original tool wa
 ### Built With
 
 [![Rust][Rust.com]][Rust-url]
-[![Nix][Nix.com][Nix-url]]
+[![Nix][Nix.com][Nix-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
