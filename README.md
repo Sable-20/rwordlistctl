@@ -10,7 +10,7 @@
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
 [![Contributors][contributors-shield]][contributors-url]
-![Lines of code](https://img.shields.io/tokei/lines/github.com/Sable-20/RWordlistctl?style=for-the-badge&logoColor=white)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/Sable-20/rwordlistctl?style=for-the-badge&logoColor=white)
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
@@ -296,15 +296,16 @@ Distributed under the GPLv3 License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Developer - Please contact the main developer (Sable-20) on GitHub through [![Issues][issues-shield]][issues-url]
-
-Blackarch - [@blackarch](https://twitter.com/blackarchlinux) - team[@]blackarch[.]org
-
 Project Link: [https://github.com/Sable-20/rwordlistctl](https://github.com/Sable-20/rwordlistctl)
 
-Website: [Blackarch Linux](https://www.blackarch.org/)
+[![Issues][issues-shield]][issues-url] Contact current maintainers here
 
-Matrix: [Matrix](https://matrix.to/#/#BlackArch:matrix.org)
+[![X/Twitter][Twitter.com]][Twitter-url] [@blackarch](https://twitter.com/blackarchlinux)
+[![E-Mail][Email.com]][Email-url] team[@]blackarch[.]org
+
+[![Website][Website.com]][Website-url] [Blackarch Linux](https://www.blackarch.org/)
+
+[![Matrix][Matrix.com]][Matrix-url] [Matrix](https://matrix.to/#/#BlackArch:matrix.org)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -359,6 +360,14 @@ Use this space to list resources you find helpful and would like to give credit 
 [Rust-url]: https://www.rust-lang.org/
 [Nix.com]: https://img.shields.io/badge/NixOS-5277C3?style=for-the-badge&logo=nixos&logoColor=white
 [Nix-url]: https://nixos.org
+[Matrix.com]: https://img.shields.io/badge/matrix-000000?style=for-the-badge&logo=Matrix&logoColor=white
+[Matrix-url]: https://matrix.to
+[Website.com]: https://img.shields.io/badge/website-000000?style=for-the-badge&logo=About.me&logoColor=white
+[Website-url]: https://www.blackarch.org
+[Email.com]: https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white
+[Email-url]: team@blackarch.org
+[Twitter.com]: https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white
+[Twitter-url]: https://twitter.com/blackarchlinux
 
 -----------------------
 
