@@ -10,6 +10,7 @@
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
 [![Contributors][contributors-shield]][contributors-url]
+![Lines of code](https://img.shields.io/tokei/lines/github.com/Sable-20/RWordlistctl?style=for-the-badge&logoColor=white)
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
@@ -103,7 +104,8 @@ This is a Rust rewrite of the original tool: `wordlistctl`. The original tool wa
 
 ### Built With
 
-* [![Rust][Rust.com]][Rust-url]
+[![Rust][Rust.com]][Rust-url]
+[![Nix][Nix.com][Nix-url]]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -355,6 +357,8 @@ Use this space to list resources you find helpful and would like to give credit 
 [JQuery-url]: https://jquery.com -->
 [Rust.com]: https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white
 [Rust-url]: https://www.rust-lang.org/
+[Nix.com]: https://img.shields.io/badge/NixOs-5277C3?style=for-the-badge&logo=nixos&logoColor=white
+[Nix-url]: https://nixos.org
 
 -----------------------
 
