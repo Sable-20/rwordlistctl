@@ -197,7 +197,8 @@ Options:
 ```
 
 #### With Docker
-[!WARNING] DEPRECATION WARNING: Docker support is a non-goal and will not recieve attention, Dockerfiles will be removed in version `1.0.0` to be replaced by `nix` generated Docker images
+> [!CAUTION] 
+> DEPRECATION WARNING: Docker support is a non-goal and will not recieve attention, Dockerfiles will be removed in version `1.0.0` to be replaced by `nix` generated Docker images
 
 If you wish to load into a fresh shell within the docker container where the wordlists will be sandboxed and not be loaded onto your host system you may run:
 ```sh
