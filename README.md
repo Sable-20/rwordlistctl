@@ -105,7 +105,7 @@ This is a Rust rewrite of the original tool: `wordlistctl`. The original tool wa
 ### Built With
 
 [![Rust][Rust.com]][Rust-url]
-![NixOS][https://img.shields.io/badge/NixOS-5277C3?style=for-the-badge&logo=nixos&logoColor=white][https://nixos.org]
+[![NixOS][https://img.shields.io/badge/NixOS-5277C3?style=for-the-badge&logo=nixos&logoColor=white][https://nixos.org]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
