@@ -14,7 +14,8 @@
       {
         defaultPackage = naersk-lib.buildPackage ./.;
         devShell = with pkgs; mkShell {
-          buildInputs = [ cargo rustc rustfmt pre-commit rustPackages.clippy pkg-config openssl openssl.dev ];
+          nativeBuildInputs = [ pkg-config ];
+          buildInputs = [ cargo rustc rustfmt pre-commit rustPackages.clippy openssl openssl.dev ];
           # PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
           RUST_SRC_PATH = rustPlatform.rustLibSrc;
           shellHook = ''
