@@ -115,7 +115,29 @@ pub struct SearchArgs {
         action = ArgAction::SetTrue,
         num_args = 0,
     )]
-    pub local: bool,
+    pub local: Option<bool>,
+
+    #[arg(
+        short = 'g',
+        long = "group",
+        value_name = "GROUP",
+        help = "Group of wordlists to fetch",
+        num_args(1..=5),
+        require_equals = true,
+        value_delimiter = ',',
+        value_enum
+    )]
+    pub group: Option<Vec<Groups>>,
+
+    #[arg(
+        long = "wordlist",
+        value_name = "WORDLISTS",
+        help = "Wordlist to search",
+        num_args(1..),
+        require_equals = true,
+        value_delimiter = ',',
+    )]
+    pub wordlists: Option<Vec<String>>,
     // #[arg(
     //     short = 'f',
     //     long = "fetch",

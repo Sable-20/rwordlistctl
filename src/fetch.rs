@@ -61,9 +61,11 @@ pub async fn retrieve_file(
     user_agent: &str,
     worker_count: usize,
 ) -> Result<()> {
-    assert!(!std::path::Path::new(&format!("/{}/{}", base_dir, list.get_name()))
-        .try_exists()
-        .expect("File already exists"));
+    assert!(
+        !std::path::Path::new(&format!("/{}/{}", base_dir, list.get_name()))
+            .try_exists()
+            .expect("File already exists")
+    );
     log::debug!("{}", list.get_url());
     let chunk_size = crate::units::convert_size(
         list.get_size().ceil() as u64,
@@ -88,9 +90,8 @@ pub async fn retrieve_file(
         std::fs::create_dir_all(&base_dir)?;
     }
 
-    let mut output_file =
-        std::fs::File::create(format!("/{}/{}", base_dir, list.get_name()))
-            .wrap_err_with(|| eyre!("Failed to create file"))?;
+    let mut output_file = std::fs::File::create(format!("/{}/{}", base_dir, list.get_name()))
+        .wrap_err_with(|| eyre!("Failed to create file"))?;
     info!("Starting download of {}", list.get_name());
     // fix types for length
     let length = if let Some(length) = length {
@@ -139,8 +140,12 @@ pub async fn retrieve_file(
         std::fs::remove_file(format!("/{}/{}", base_dir, list.get_name()))?;
     } else if gz_re.is_match(list.get_url()) {
         info!("Decompressing file");
-        let gz = std::io::BufReader::new(std::fs::File::open(format!("/{}/{}", base_dir, list.get_name()))?);
-        
+        let gz = std::io::BufReader::new(std::fs::File::open(format!(
+            "/{}/{}",
+            base_dir,
+            list.get_name()
+        ))?);
+
         let mut decoder = flate2::bufread::GzDecoder::new(gz);
         let mut buffer = Vec::new();
         std::io::copy(&mut decoder, &mut buffer)?;
