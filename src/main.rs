@@ -99,7 +99,79 @@ async fn main() -> Result<()> {
 
     let cli = cli::build_cli().get_matches();
 
-    // match cli.subcommand_matches() {
+    match cli.subcommand() {
+        Some(("fetch", sub_matches)) => {
+            let regex = sub_matches.get_one::<bool>("regex").unwrap();
+            let decompress = sub_matches.get_one::<bool>("decompress").unwrap();
+            let user_agent = sub_matches.get_one::<String>("user-agent").unwrap();
+            let base_dir = sub_matches.get_one::<String>("base-dir").unwrap();
+            let workers = sub_matches.get_one::<u8>("workers").unwrap();
+            let wordlists = sub_matches.get_one::<Vec<String>>("wordlists").unwrap();
+            let group = sub_matches.get_one::<Vec<args::Groups>>("group").unwrap();
+            match (regex, decompress) {
+                (true, true) => {
+                    for list in wordlists.iter() {
+                        for list in get_wordlist_by_name_regex(list)? {
+                            fetch::retrieve_file(
+                                &list,
+                                *decompress,
+                                base_dir,
+                                user_agent,
+                                *workers as usize,
+                            )
+                            .await?;
+                        }
+                    }
+                },
+                (true, false) => {
+                    for list in wordlists.iter() {
+                        for list in get_wordlist_by_name_regex(list)? {
+                            fetch::retrieve_file(
+                                &list,
+                                *decompress,
+                                base_dir,
+                                user_agent,
+                                *workers as usize,
+                            )
+                            .await?;
+                        }
+                    }
+                },
+                (false, true) => {
+                    for list in wordlists.iter() {
+                        if let Ok(list) = get_wordlist_by_name(list) {
+                            fetch::retrieve_file(
+                                &list,
+                                *decompress,
+                                base_dir,
+                                user_agent,
+                                *workers as usize
+                            )
+                            .await?;
+                        } else {
+                            error!("Failed to fetch wordlist");
+                        }
+                    }
+                },
+                (false, false) => {
+                    for list in wordlists.iter() {
+                        fetch::retrieve_file(
+                            &get_wordlist_by_name(&list)?,
+                            *decompress,
+                            base_dir,
+                            user_agent,
+                            *workers as usize,
+                        )
+                        .await?;
+                    }
+                    info!("File fetched successfully");
+                },
+            }
+        }
+        _ => unimplemented!(),
+    }
+
+    // match cli.subcommand() {
     //     Some(commands::Command::Fetch(args)) => {
     //         trace!("Fetch called!");
     //         info!("{:#?}", args);
