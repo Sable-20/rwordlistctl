@@ -21,6 +21,8 @@ mod fetch;
 mod repo;
 mod units;
 
+// TODO: change default base dir based on whether the user is root or not
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let now = std::time::Instant::now();
