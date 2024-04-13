@@ -245,8 +245,12 @@ Options:
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Use mangen to generate man pages
+- [x] Use mangen to generate man pages
+- [ ] Implement multi threading in fetch properly
+- [ ] Gracefully shut down on `Ctrl-C`
+- [ ] Replace all instances of `eyre!` with graceful shutdowns
 - [ ] Determine if `list` and `search` are redundant and if we should remove
+- [ ] Implement both fetching by group *and* fetching by wordlist name with fetch command
 - [ ] Implement custom config file (TOML format)
 - [ ] Write tests
 - [ ] Write proper documentation
@@ -305,6 +309,7 @@ Project Link: [https://github.com/Sable-20/rwordlistctl](https://github.com/Sabl
 [![Issues][issues-shield]][issues-url] Contact current maintainers here
 
 [![X/Twitter][Twitter.com]][Twitter-url] [@blackarch](https://twitter.com/blackarchlinux)
+<br>
 [![E-Mail][Email.com]][Email-url] team[@]blackarch[.]org
 
 [![Website][Website.com]][Website-url] [Blackarch Linux](https://www.blackarch.org/)

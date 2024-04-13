@@ -90,7 +90,10 @@ pub async fn retrieve_file(
         std::fs::create_dir_all(&base_dir)?;
     }
 
-    let mut output_file = std::fs::File::create(format!("/{}/{}", base_dir, list.get_name()))
+    let mut output_file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(format!("/{}/{}", base_dir, list.get_name()))
         .wrap_err_with(|| eyre!("Failed to create file"))?;
     info!("Starting download of {}", list.get_name());
     // fix types for length

@@ -18,9 +18,9 @@ pub fn get_worker_count() -> u8 {
     load_config().unwrap().worker_count
 }
 
-pub fn get_retry_count() -> u8 {
-    load_config().unwrap().retry_count
-}
+// pub fn get_retry_count() -> u8 {
+//     load_config().unwrap().retry_count
+// }
 
 // pub fn get_base_dir() -> String {
 //     load_config().unwrap().path

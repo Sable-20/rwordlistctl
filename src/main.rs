@@ -2,12 +2,14 @@ use std::io::Write;
 
 use ansi_term::Color::Red;
 
-use clap::{crate_authors, crate_description, crate_version, value_parser, Arg, Command, Parser};
-use color_eyre::{eyre::eyre, Result};
+use color_eyre::{
+    eyre::eyre,
+    Result,
+};
 
 use pretty_env_logger::env_logger;
 
-use log::{debug, error, info, trace};
+use log::{error, info};
 
 use crate::repo::{get_wordlist_by_name, get_wordlist_by_name_regex};
 
@@ -18,29 +20,6 @@ mod config;
 mod fetch;
 mod repo;
 mod units;
-
-// #[derive(Parser, Debug)]
-// #[command(
-//     version,
-//     about,
-//     long_about = None,
-//     author,
-//     arg_required_else_help = true,
-//     subcommand_required = true
-// )]
-// struct RWordlistctl {
-//     // #[arg(
-//     //     short = 'c',
-//     //     long = "config",
-//     //     value_name = "CONFIG",
-//     //     help = "Path to the configuration file",
-//     //     default_value = "/usr/share/rwordlistctl/.config/config.toml",
-//     // )]
-//     // config: Option<PathBuf>,
-
-//     #[command(subcommand)]
-//     command: Option<Command>,
-// }
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -80,7 +59,7 @@ async fn main() -> Result<()> {
         }
         #[cfg(debug_assertions)]
         _ => pretty_env_logger::formatted_builder()
-            .filter_level(log::LevelFilter::Trace)
+            .filter_level(log::LevelFilter::Info)
             .target(env_logger::Target::Stdout)
             .init(),
         #[cfg(not(debug_assertions))]
@@ -106,14 +85,46 @@ async fn main() -> Result<()> {
             let user_agent = sub_matches.get_one::<String>("user-agent").unwrap();
             let base_dir = sub_matches.get_one::<String>("base-dir").unwrap();
             let workers = sub_matches.get_one::<u8>("workers").unwrap();
-            let wordlists = sub_matches.get_one::<Vec<String>>("wordlists").unwrap();
-            let group = sub_matches.get_one::<Vec<args::Groups>>("group").unwrap();
+            let wordlists = 
+                sub_matches.get_one::<String>("wordlists").unwrap().split(',').collect::<Vec<&str>>();
+            //let wordlists = wordlists.split(',').collect::<Vec<&str>>();
             match (regex, decompress) {
                 (true, true) => {
+                    let mut size: f64 = 0.0;
+                    let mut wordlists_to_fetch = vec![];
                     for list in wordlists.iter() {
                         for list in get_wordlist_by_name_regex(list)? {
+                            size += list.get_size();
+                            wordlists_to_fetch.push(list);
+                        }
+                    }
+                    if size >= 1_000_000_000.0 {
+                        let ans = inquire::Confirm::new("Are you sure you want to download this many wordlists? The size is >= 1.0 GB")
+                            .with_default(true)
+                            .with_help_message("This is quite a lot of data")
+                            .prompt()?;
+
+                        match ans {
+                            true => {
+                                for list in wordlists_to_fetch.iter() {
+                                    fetch::retrieve_file(
+                                        list,
+                                        *decompress,
+                                        base_dir,
+                                        user_agent,
+                                        *workers as usize,
+                                    )
+                                    .await?;
+                                }
+                            }
+                            false => {
+                                info!("Aborting download");
+                            }
+                        }
+                    } else {
+                        for list in wordlists_to_fetch.iter() {
                             fetch::retrieve_file(
-                                &list,
+                                list,
                                 *decompress,
                                 base_dir,
                                 user_agent,
@@ -122,12 +133,44 @@ async fn main() -> Result<()> {
                             .await?;
                         }
                     }
-                },
+                    return Ok(());
+                }
                 (true, false) => {
+                    let mut size: f64 = 0.0;
+                    let mut wordlists_to_fetch = vec![];
                     for list in wordlists.iter() {
                         for list in get_wordlist_by_name_regex(list)? {
+                            size += list.get_size();
+                            wordlists_to_fetch.push(list);
+                        }
+                    }
+                    if size >= 1_000_000_000.0 {
+                        let ans = inquire::Confirm::new("Are you sure you want to download this many wordlists? The size is >= 1.0 GB")
+                            .with_default(true)
+                            .with_help_message("This is quite a lot of data")
+                            .prompt()?;
+
+                        match ans {
+                            true => {
+                                for list in wordlists_to_fetch.iter() {
+                                    fetch::retrieve_file(
+                                        list,
+                                        *decompress,
+                                        base_dir,
+                                        user_agent,
+                                        *workers as usize,
+                                    )
+                                    .await?;
+                                }
+                            }
+                            false => {
+                                info!("Aborting download");
+                            }
+                        }
+                    } else {
+                        for list in wordlists_to_fetch.iter() {
                             fetch::retrieve_file(
-                                &list,
+                                list,
                                 *decompress,
                                 base_dir,
                                 user_agent,
@@ -136,183 +179,231 @@ async fn main() -> Result<()> {
                             .await?;
                         }
                     }
-                },
+                    return Ok(());
+                }
                 (false, true) => {
+                    let mut size: f64 = 0.0;
+                    let mut wordlists_to_fetch = vec![];
                     for list in wordlists.iter() {
-                        if let Ok(list) = get_wordlist_by_name(list) {
+                        let lst = get_wordlist_by_name(list)?;
+                        size += lst.get_size();
+                        wordlists_to_fetch.push(lst);
+                    }
+                    if size >= 1_000_000_000.0 {
+                        let ans = inquire::Confirm::new("Are you sure you want to download this many wordlists? The size is >= 1.0 GB")
+                            .with_default(true)
+                            .with_help_message("This is quite a lot of data")
+                            .prompt()?;
+
+                        match ans {
+                            true => {
+                                for list in wordlists_to_fetch.iter() {
+                                    fetch::retrieve_file(
+                                        list,
+                                        *decompress,
+                                        base_dir,
+                                        user_agent,
+                                        *workers as usize,
+                                    )
+                                    .await?;
+                                }
+                            }
+                            false => {
+                                info!("Aborting download");
+                            }
+                        }
+                    } else {
+                        for list in wordlists_to_fetch.iter() {
                             fetch::retrieve_file(
-                                &list,
+                                list,
                                 *decompress,
                                 base_dir,
                                 user_agent,
-                                *workers as usize
+                                *workers as usize,
                             )
                             .await?;
-                        } else {
-                            error!("Failed to fetch wordlist");
                         }
                     }
-                },
+                    return Ok(());
+                }
                 (false, false) => {
+                    let mut size: f64 = 0.0;
+                    let mut wordlists_to_fetch = vec![];
                     for list in wordlists.iter() {
-                        fetch::retrieve_file(
-                            &get_wordlist_by_name(&list)?,
-                            *decompress,
-                            base_dir,
-                            user_agent,
-                            *workers as usize,
+                        let lst = get_wordlist_by_name(list)?;
+                        size += lst.get_size();
+                        wordlists_to_fetch.push(lst);
+                    }
+                    if size >= 1_000_000_000.0 {
+                        let ans = inquire::Confirm::new("Are you sure you want to download this many wordlists? The size is >= 1.0 GB")
+                            .with_default(true)
+                            .with_help_message("This is quite a lot of data")
+                            .prompt()?;
+
+                        match ans {
+                            true => {
+                                for list in wordlists_to_fetch.iter() {
+                                    fetch::retrieve_file(
+                                        list,
+                                        *decompress,
+                                        base_dir,
+                                        user_agent,
+                                        *workers as usize,
+                                    )
+                                    .await?;
+                                }
+                            }
+                            false => {
+                                info!("Aborting download");
+                            }
+                        }
+                    } else {
+                        for list in wordlists_to_fetch.iter() {
+                            fetch::retrieve_file(
+                                list,
+                                *decompress,
+                                base_dir,
+                                user_agent,
+                                *workers as usize,
+                            )
+                            .await?;
+                        }
+                    }
+                    return Ok(());
+                }
+            }
+        }
+        Some(("search", sub_matches)) => {
+            if sub_matches.get_one::<Vec<String>>("wordlist").is_none()
+                && sub_matches.get_one::<Vec<args::Groups>>("group").is_none()
+            {
+                return Err(eyre!("No search term provided"));
+            }
+            let wordlists = sub_matches.get_one::<String>("wordlists").unwrap().split(',').collect::<Vec<&str>>();
+            let group = sub_matches.get_one::<String>("group").unwrap().split(',').collect::<Vec<&str>>();
+            let local = sub_matches.get_flag("local");
+            if !wordlists.is_empty() {
+                for list in wordlists.iter() {
+                    let wordlist = get_wordlist_by_name(list)?;
+                    println!("{:#?}", wordlist);
+                }
+            }
+            if !group.is_empty() {
+                for group in group.iter() {
+                    let wordlists = repo::get_wordlist_by_group(*group)?;
+                    for wordlist in wordlists {
+                        println!("{:#?}", wordlist);
+                    }
+                }
+            }
+            if local {
+                for list in wordlists.iter() {
+                    let wordlist = get_wordlist_by_name(list)?;
+                    let path = format!("/usr/share/wordlists/{}", wordlist.get_name());
+                    if std::path::Path::new(&path).try_exists()? {
+                        // pretty display info
+                        println!("Wordlist found at: {}", path);
+                    } else {
+                        error!("Wordlist not found at: {}", path);
+                    }
+                }
+            }
+        }
+        Some(("list", sub_matches)) => {
+            let fetch = sub_matches.get_flag("fetch");
+            let count = sub_matches.get_one::<u8>("number").unwrap();
+            let mut lists = vec![];
+            let groups = sub_matches.get_one::<String>("group").unwrap().split(',').collect::<Vec<&str>>();
+            if groups.is_empty() {
+                return Err(eyre!("No groups provided"));
+            }
+            let mut ctr = 0;
+            for group in groups.iter() {
+                for lst in repo::get_wordlist_by_group(*group)? {
+                    lists.push(lst);
+                    if ctr == *count {
+                        break;
+                    }
+                    ctr += 1;
+                }
+            }
+            if !fetch {
+                println!("Possible lists: {:#?}", &lists.iter().map(|list| list.get_name()).collect::<Vec<&str>>());
+                return Ok(());
+            }
+            let names = lists
+                .iter()
+                .map(|list| list.get_name())
+                .collect::<Vec<&str>>();
+            let sizes = lists
+                .iter()
+                .map(|list| units::readable_size(list.get_size().ceil() as usize))
+                .collect::<Vec<(f64, units::Units)>>();
+            let mut sizes_with_text = vec![];
+            for (size, unit) in sizes.iter() {
+                sizes_with_text.push(format!(" {:.2} {}", size, unit));
+            }
+            let confirmation_opts: Vec<_> = names.iter().zip(sizes_with_text.iter()).collect();
+            let opts = lists
+                .iter()
+                .map(|list| list.get_name().to_owned())
+                .collect::<Vec<String>>();
+            let confirmation = inquire::Confirm::new(
+                &format!(
+                    "Are you sure you want to download these files? \n
+                    {}",
+                    confirmation_opts
+                        .iter()
+                        .map(|(name, size)| {
+                            format!(
+                                "{} - [{}]", 
+                                name, 
+                                size.to_string())
+                        })
+                        .collect::<Vec<String>>()
+                        .join("\n")
+                )
+            )
+            .with_default(true)
+            .with_help_message("These are all the lists you selected")
+            .prompt()?;
+            match confirmation {
+                true => {
+                    for list in lists.iter() {
+                        crate::fetch::retrieve_file(
+                            list,
+                            true,
+                            "/usr/share/wordlists",
+                            "rwordlistctl/0.1.0",
+                            config::get_worker_count() as usize,
                         )
                         .await?;
                     }
-                    info!("File fetched successfully");
-                },
+                }
+                false => {
+                    // let formatter: inquire::formatter::MultiOptionFormatter<'_, &str> = &|opt| format!("{} different lists", opt.len());
+                    let multiselect =
+                        inquire::MultiSelect::new("Select the lists you want to download", opts)
+                            //.with_formatter(formatter)
+                            .prompt()?;
+                    for name in multiselect {
+                        let list = get_wordlist_by_name(&name)?;
+                        crate::fetch::retrieve_file(
+                            &list,
+                            true,
+                            "/usr/share/wordlists",
+                            "rwordlistctl/0.1.0",
+                            config::get_worker_count() as usize,
+                        )
+                        .await?;
+                    }
+                }
             }
         }
-        _ => unimplemented!(),
+        _ => {
+            return Err(eyre!("No command provided"));
+        }
     }
-
-    // match cli.subcommand() {
-    //     Some(commands::Command::Fetch(args)) => {
-    //         trace!("Fetch called!");
-    //         info!("{:#?}", args);
-    //         info!(
-    //             "User agent: {}",
-    //             Red.bold().italic().paint(args.user_agent.as_ref().unwrap())
-    //         );
-    //         match (args.regex, args.decompress) {
-    //             (true, true) => {
-    //                 trace!("Decompress and regex");
-    //                 for list in args.wordlists.iter() {
-    //                     for list in get_wordlist_by_name_regex(list)? {
-    //                         fetch::retrieve_file(
-    //                             &list,
-    //                             args.decompress,
-    //                             args.base_dir.as_ref().unwrap(),
-    //                             args.user_agent.as_ref().unwrap(),
-    //                             args.workers as usize,
-    //                         )
-    //                         .await?;
-    //                     }
-    //                 }
-    //             }
-    //             (true, false) => {
-    //                 trace!("Regex only");
-    //                 for list in args.wordlists.iter() {
-    //                     for list in get_wordlist_by_name_regex(list)? {
-    //                         fetch::retrieve_file(
-    //                             &list,
-    //                             args.decompress,
-    //                             args.base_dir.as_ref().unwrap(),
-    //                             args.user_agent.as_ref().unwrap(),
-    //                             args.workers as usize,
-    //                         )
-    //                         .await?;
-    //                     }
-    //                 }
-    //             }
-    //             (false, true) => {
-    //                 for list in args.wordlists.iter() {
-    //                     if let Ok(list) = get_wordlist_by_name(list) {
-    //                        fetch::retrieve_file(
-    //                             &list,
-    //                             args.decompress,
-    //                             args.base_dir.as_ref().unwrap(),
-    //                             args.user_agent.as_ref().unwrap(),
-    //                             args.workers as usize
-    //                         )
-    //                         .await?;
-    //                     } else {
-    //                         error!("Failed to fetch wordlist");
-    //                     }
-    //                 }
-    //             }
-    //             (false, false) => {
-    //                 for list in args.wordlists.iter() {
-    //                     fetch::retrieve_file(
-    //                         &get_wordlist_by_name(&list)?,
-    //                         args.decompress,
-    //                         args.base_dir.as_ref().unwrap(),
-    //                         args.user_agent.as_ref().unwrap(),
-    //                         args.workers as usize,
-    //                     )
-    //                     .await?;
-    //                 }
-    //                 info!("File fetched successfully");
-    //             }
-    //         }
-    //     }
-    //     Some(commands::Command::Search(args)) => {
-    //         if args.wordlists.is_none() && args.group.is_none() {
-    //             return Err(eyre!("No search term provided"));
-    //         }
-    //         if args.wordlists.is_some() {
-    //             for list in args.wordlists.as_ref().unwrap() {
-    //                 let wordlist = get_wordlist_by_name(list)?;
-    //                 println!("{:#?}", wordlist);
-    //             }
-    //         }
-    //         if args.group.is_some() {
-    //             for group in args.group.as_ref().unwrap() {
-    //                 let wordlists = repo::get_wordlist_by_group(*group)?;
-    //                 for wordlist in wordlists {
-    //                     println!("{:#?}", wordlist);
-    //                 }
-    //             }
-    //         }
-    //         if args.local.is_some() {
-    //             for list in args.wordlists.as_ref().unwrap() {
-    //                 let wordlist = get_wordlist_by_name(list)?;
-    //                 let path = format!("/usr/share/wordlists/{}", wordlist.get_name());
-    //                 if std::path::Path::new(&path).try_exists()? {
-    //                     // pretty display info
-    //                     println!("Wordlist found at: {}", path);
-    //                 } else {
-    //                     error!("Wordlist not found at: {}", path);
-    //                 }
-    //             }
-    //         }
-
-    //         return Ok(());
-    //     }
-    //     Some(commands::Command::List(args)) => {
-    //         debug!("List args: {:#?}", args);
-    //         if !args.fetch {
-    //             for groups in args.group.iter() {
-    //                 for group in groups {
-    //                     let lists = repo::get_wordlist_by_group(*group)?;
-    //                     let names = lists
-    //                         .iter()
-    //                         .map(|list| list.get_name().to_owned())
-    //                         .collect::<Vec<String>>();
-    //                     println!("Possible lists: {:#?}\n\nWith {} more options", &names[0..args.number as usize], &names.len() - args.number as usize);
-    //                     info!("Size of lists: {:?}", &lists.iter().map(|list| list.get_size()).collect::<Vec<f64>>()[0..args.number as usize]);
-    //                 }
-    //             }
-    //             return Ok(());
-    //         }
-    //         for groups in args.group.iter() {
-    //             for group in groups {
-    //                 let lists = repo::get_wordlist_by_group(*group)?;
-    //                 for list in lists {
-    //                     // use config to get the base dir and user agent
-    //                     crate::fetch::retrieve_file(
-    //                         &list,
-    //                         true,
-    //                         "/usr/share/wordlists",
-    //                         "rwordlistctl/0.1.0",
-    //                         config::get_worker_count() as usize,
-    //                     )
-    //                     .await?;
-    //                 }
-    //             }
-    //         }
-    //         return Ok(());
-    //     }
-    //     &None => {
-    //         return Err(eyre!("No command provided"));
-    //     }
-    // }
-
     info!("Time elapsed: {:.2?} seconds", now.elapsed().as_secs_f64());
     Ok(())
 }
