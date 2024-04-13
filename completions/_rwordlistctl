@@ -1,0 +1,171 @@
+#compdef rwordlistctl
+
+autoload -U is-at-least
+
+_rwordlistctl() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+":: :_rwordlistctl_commands" \
+"*::: :->rwordlistctl" \
+&& ret=0
+    case $state in
+    (rwordlistctl)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:rwordlistctl-command-$line[1]:"
+        case $line[1] in
+            (fetch)
+_arguments "${_arguments_options[@]}" \
+'-w+[Number of download workers]:COUNT: ' \
+'--workers=[Number of download workers]:COUNT: ' \
+'-u+[User agent to use for fetching]:USER_AGENT: ' \
+'--user-agent=[User agent to use for fetching]:USER_AGENT: ' \
+'-b+[Base directory to store wordlists]:BASE_DIR: ' \
+'--base-dir=[Base directory to store wordlists]:BASE_DIR: ' \
+'-l+[Wordlist to fetch]:WORDLISTS: ' \
+'--wordlist=[Wordlist to fetch]:WORDLISTS: ' \
+'-g+[Group to fetch wordlists]:GROUP: ' \
+'--group=[Group to fetch wordlists]:GROUP: ' \
+'-d[Decompress and remove the archive file]' \
+'--decompress[Decompress and remove the archive file]' \
+'-r[Use regex to search for wordlists]' \
+'--regex[Use regex to search for wordlists]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(search)
+_arguments "${_arguments_options[@]}" \
+'--wordlist=[Name of the wordlist to search for]:NAME: ' \
+'-g+[Group of wordlists to search for]:GROUP: ' \
+'--group=[Group of wordlists to search for]:GROUP: ' \
+'-r[Use regex to search for wordlists]' \
+'--regex[Use regex to search for wordlists]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" \
+'-g+[Group of wordlists to list]:GROUP: ' \
+'--group=[Group of wordlists to list]:GROUP: ' \
+'-n+[Number of wordlists to list]:COUNT: ' \
+'--number=[Number of wordlists to list]:COUNT: ' \
+'-f[Fetch wordlists from the repository at the given indexes]' \
+'--fetch[Fetch wordlists from the repository at the given indexes]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" \
+":: :_rwordlistctl__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:rwordlistctl-help-command-$line[1]:"
+        case $line[1] in
+            (fetch)
+_arguments "${_arguments_options[@]}" \
+&& ret=0
+;;
+(search)
+_arguments "${_arguments_options[@]}" \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+}
+
+(( $+functions[_rwordlistctl_commands] )) ||
+_rwordlistctl_commands() {
+    local commands; commands=(
+'fetch:Fetch wordlists' \
+'search:Search for wordlists' \
+'list:List wordlists' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'rwordlistctl commands' commands "$@"
+}
+(( $+functions[_rwordlistctl__fetch_commands] )) ||
+_rwordlistctl__fetch_commands() {
+    local commands; commands=()
+    _describe -t commands 'rwordlistctl fetch commands' commands "$@"
+}
+(( $+functions[_rwordlistctl__help__fetch_commands] )) ||
+_rwordlistctl__help__fetch_commands() {
+    local commands; commands=()
+    _describe -t commands 'rwordlistctl help fetch commands' commands "$@"
+}
+(( $+functions[_rwordlistctl__help_commands] )) ||
+_rwordlistctl__help_commands() {
+    local commands; commands=(
+'fetch:Fetch wordlists' \
+'search:Search for wordlists' \
+'list:List wordlists' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'rwordlistctl help commands' commands "$@"
+}
+(( $+functions[_rwordlistctl__help__help_commands] )) ||
+_rwordlistctl__help__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'rwordlistctl help help commands' commands "$@"
+}
+(( $+functions[_rwordlistctl__help__list_commands] )) ||
+_rwordlistctl__help__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'rwordlistctl help list commands' commands "$@"
+}
+(( $+functions[_rwordlistctl__list_commands] )) ||
+_rwordlistctl__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'rwordlistctl list commands' commands "$@"
+}
+(( $+functions[_rwordlistctl__help__search_commands] )) ||
+_rwordlistctl__help__search_commands() {
+    local commands; commands=()
+    _describe -t commands 'rwordlistctl help search commands' commands "$@"
+}
+(( $+functions[_rwordlistctl__search_commands] )) ||
+_rwordlistctl__search_commands() {
+    local commands; commands=()
+    _describe -t commands 'rwordlistctl search commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_rwordlistctl" ]; then
+    _rwordlistctl "$@"
+else
+    compdef _rwordlistctl rwordlistctl
+fi

@@ -20,12 +20,11 @@
         };
         devShell = with pkgs; mkShell {
           nativeBuildInputs = [ pkg-config ];
-          buildInputs = [ cargo rustc rustfmt pre-commit rustPackages.clippy openssl ];
+          buildInputs = [ cargo rustc rustfmt pre-commit rustPackages.clippy openssl man ];
           # PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
           RUST_SRC_PATH = rustPlatform.rustLibSrc;
           shellHook = ''
-            echo "Entering devShell"
-            export PS1="\[\033[4;31m\](devSheel)\[\033[0;00m\] $PS1"
+	    export PS1="[\[\033[4;31m\](devShell)\[\033[0;00m\] \$] "
           '';
         };
       }
