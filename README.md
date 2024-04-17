@@ -254,6 +254,7 @@ Options:
 - [ ] Implement custom config file (TOML format)
 - [ ] Write tests
 - [ ] Write proper documentation
+- [ ] Implement proper workers
 - [ ] Multi-language Documentation
     - [ ] Chinese
     - [ ] Spanish

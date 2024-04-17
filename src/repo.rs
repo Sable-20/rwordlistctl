@@ -47,7 +47,7 @@ fn load_repo() -> Result<Repo> {
     Ok(repo)
 }
 
-pub fn get_wordlist_by_group(group: &str) -> Result<Vec<Wordlist>> {
+pub fn get_wordlist_by_group(group: &crate::args::Groups) -> Result<Vec<Wordlist>> {
     let repo: Repo = load_repo()?;
     let wordlists = repo.wordlists[0]
         .values()

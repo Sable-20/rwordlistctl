@@ -1,5 +1,5 @@
 use clap::ValueEnum;
-// use std::fmt;
+use std::fmt;
 
 // use crate::config;
 
@@ -12,17 +12,36 @@ pub enum Groups {
     Misc,
 }
 
-// impl fmt::Display for Groups {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         match self {
-//             Self::Usernames => write!(f, "usernames"),
-//             Self::Passwords => write!(f, "passwords"),
-//             Self::Discovery => write!(f, "discovery"),
-//             Self::Fuzzing => write!(f, "fuzzing"),
-//             Self::Misc => write!(f, "misc"),
-//         }
-//     }
-// }
+impl From<&str> for Groups {
+    fn from(s: &str) -> Self {
+        match s {
+            "usernames" => Self::Usernames,
+            "passwords" => Self::Passwords,
+            "discovery" => Self::Discovery,
+            "fuzzing" => Self::Fuzzing,
+            "misc" => Self::Misc,
+            _ => panic!("Invalid group"),
+        }
+    }
+}
+
+impl AsRef<Groups> for Groups {
+    fn as_ref(&self) -> &Groups {
+        self
+    }
+}
+
+impl fmt::Display for Groups {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Usernames => write!(f, "usernames"),
+            Self::Passwords => write!(f, "passwords"),
+            Self::Discovery => write!(f, "discovery"),
+            Self::Fuzzing => write!(f, "fuzzing"),
+            Self::Misc => write!(f, "misc"),
+        }
+    }
+}
 
 // #[derive(Args, Debug)]
 // pub struct FetchArgs {

@@ -1,10 +1,9 @@
 use std::io::Write;
 
-use ansi_term::Color::Red;
+use ansi_term::Color::{Green, Red};
 
 use color_eyre::{
-    eyre::eyre,
-    Result,
+    eyre::eyre, Result
 };
 
 use pretty_env_logger::env_logger;
@@ -87,9 +86,11 @@ async fn main() -> Result<()> {
             let user_agent = sub_matches.get_one::<String>("user-agent").unwrap();
             let base_dir = sub_matches.get_one::<String>("base-dir").unwrap();
             let workers = sub_matches.get_one::<u8>("workers").unwrap();
-            let wordlists = 
-                sub_matches.get_one::<String>("wordlists").unwrap().split(',').collect::<Vec<&str>>();
-            //let wordlists = wordlists.split(',').collect::<Vec<&str>>();
+            let wordlists = sub_matches
+                                                            .get_many::<String>("wordlists")
+                                                            .unwrap()
+                                                            .map(|v| v.as_str())
+                                                            .collect::<Vec<_>>();
             match (regex, decompress) {
                 (true, true) => {
                     let mut size: f64 = 0.0;
@@ -199,16 +200,19 @@ async fn main() -> Result<()> {
 
                         match ans {
                             true => {
-                                for list in wordlists_to_fetch.iter() {
-                                    fetch::retrieve_file(
-                                        list,
-                                        *decompress,
-                                        base_dir,
-                                        user_agent,
-                                        *workers as usize,
-                                    )
-                                    .await?;
-                                }
+                                std::thread::scope(|s| {
+                                    for list in wordlists_to_fetch.iter() {
+                                        s.spawn(|| async {
+                                            let _ = fetch::retrieve_file(
+                                                list,
+                                                *decompress,
+                                                base_dir,
+                                                user_agent,
+                                                *workers as usize,
+                                            ).await;
+                                        });
+                                    }
+                                });
                             }
                             false => {
                                 info!("Aborting download");
@@ -281,8 +285,8 @@ async fn main() -> Result<()> {
             {
                 return Err(eyre!("No search term provided"));
             }
-            let wordlists = sub_matches.get_one::<String>("wordlists").unwrap().split(',').collect::<Vec<&str>>();
-            let group = sub_matches.get_one::<String>("group").unwrap().split(',').collect::<Vec<&str>>();
+            let wordlists = sub_matches.get_many::<String>("wordlists").unwrap().map(|v| v.as_str()).collect::<Vec<&str>>();
+            let group = sub_matches.get_many::<args::Groups>("group").unwrap().map(|v| v.as_ref()).collect::<Vec<&args::Groups>>();
             let local = sub_matches.get_flag("local");
             if !wordlists.is_empty() {
                 for list in wordlists.iter() {
@@ -312,16 +316,14 @@ async fn main() -> Result<()> {
             }
         }
         Some(("list", sub_matches)) => {
-            let fetch = sub_matches.get_flag("fetch");
-            let count = sub_matches.get_one::<u8>("number").unwrap();
             let mut lists = vec![];
-            let groups = sub_matches.get_one::<String>("group").unwrap().split(',').collect::<Vec<&str>>();
-            if groups.is_empty() {
-                return Err(eyre!("No groups provided"));
-            }
             let mut ctr = 0;
+            let count = sub_matches.get_one::<u8>("number").unwrap();
+            let fetch = sub_matches.get_flag("fetch");
+            let groups = sub_matches.get_many::<String>("group").unwrap().map(|v| v.as_str()).collect::<Vec<&str>>();
+            // let groups = sub_matches.get_many::<args::Groups>("group").unwrap().map(|v| v.as_ref()).collect::<Vec<&args::Groups>>();
             for group in groups.iter() {
-                for lst in repo::get_wordlist_by_group(*group)? {
+                for lst in repo::get_wordlist_by_group(&crate::args::Groups::from(*group))? {
                     lists.push(lst);
                     if ctr == *count {
                         break;
@@ -330,7 +332,16 @@ async fn main() -> Result<()> {
                 }
             }
             if !fetch {
-                println!("Possible lists: {:#?}", &lists.iter().map(|list| list.get_name()).collect::<Vec<&str>>());
+                println!("{} Possible lists", Green.bold().underline().paint(lists.len().to_string()));
+                for i in 0..lists.len() {
+                    println!("{}. {} - {} {}", 
+                        ansi_term::Colour::Cyan.bold().paint(i.to_string()), 
+                        Green.italic().paint(lists[i].get_name()),
+                        Red.bold().paint(units::readable_size(lists[i].get_size().ceil() as usize).0.to_string()),
+                        Red.bold().paint(units::readable_size(lists[i].get_size().ceil() as usize).1.to_string())
+                    );
+                }
+                // println!("Possible lists: {:#?}", &lists.iter().map(|list| list.get_name()).collect::<Vec<&str>>());
                 return Ok(());
             }
             let names = lists
